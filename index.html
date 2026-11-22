@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timothée Barselo (Timothee19) — Portfolio IA, Data Science &amp; Systèmes Embarqués</title>
+  <meta name="description" content="Portfolio GitHub de Timothée Barselo (@Timothee19), élève-ingénieur Data &amp; IA à l'ESILV et membre de Vinci Eco Drive. Projets Deep Learning, LLM multi-agents, Machine Learning et systèmes embarqués.">
+  <meta name="keywords" content="Timothée Barselo, Timothee19, ESILV, Data Science, Intelligence Artificielle, Deep Learning, Machine Learning, TensorFlow, Python, Mistral AI, SHAP, Vinci Eco Drive, ESP32, KiCad, Portfolio GitHub">
+  <meta name="author" content="Timothée Barselo">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0b0f19">
+  <link rel="canonical" href="https://timothee19.github.io/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="Timothée Barselo — Portfolio">
+  <meta property="og:title" content="Timothée Barselo (@Timothee19) — IA, Data Science &amp; Systèmes Embarqués">
+  <meta property="og:description" content="Découvrez mes projets open-source et collaborations : Deep Learning médical (Alzheimer OASIS-1), générateur Anki multi-agents, SRGAN, IA explicable CS2 et électronique embarquée Vinci Eco Drive.">
+  <meta property="og:url" content="https://timothee19.github.io/">
+  <meta property="og:image" content="https://avatars.githubusercontent.com/u/108196706?v=4">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Timothée Barselo (@Timothee19) — Portfolio GitHub">
+  <meta name="twitter:description" content="Projets IA, Deep Learning, Machine Learning &amp; Systèmes Embarqués — ESILV &amp; Vinci Eco Drive.">
+  <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/108196706?v=4">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Structured Data (JSON-LD) for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://timothee19.github.io/#person",
+        "name": "Timothée Barselo",
+        "alternateName": "Timothee19",
+        "url": "https://timothee19.github.io/",
+        "image": "https://avatars.githubusercontent.com/u/108196706?v=4",
+        "jobTitle": "Élève-Ingénieur Data & Intelligence Artificielle",
+        "affiliation": [
+          {
+            "@type": "EducationalOrganization",
+            "name": "ESILV — École Supérieure d'Ingénieurs Léonard de Vinci"
+          },
+          {
+            "@type": "Organization",
+            "name": "Vinci Eco Drive"
+          }
+        ],
+        "sameAs": [
+          "https://github.com/Timothee19"
+        ],
+        "knowsAbout": [
+          "Deep Learning",
+          "Machine Learning",
+          "Computer Vision",
+          "Large Language Models",
+          "Explainable AI (SHAP)",
+          "Python",
+          "TensorFlow",
+          "Embedded Systems",
+          "ESP32",
+          "KiCad PCB Design"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://timothee19.github.io/#website",
+        "url": "https://timothee19.github.io/",
+        "name": "Timothée Barselo — Portfolio GitHub",
+        "inLanguage": "fr-FR",
+        "publisher": { "@id": "https://timothee19.github.io/#person" }
+      },
+      {
+        "@type": "ItemList",
+        "name": "Projets GitHub de Timothée Barselo",
+        "itemListElement": [
+          {
+            "@type": "SoftwareSourceCode",
+            "position": 1,
+            "name": "alzheimer-mri-oasis1",
+            "description": "EDA et modélisation Deep Learning (CNN 2D, Attention MIL 61 coupes, MobileNetV2 2.5D) sur IRM Alzheimer OASIS-1 sous TensorFlow.",
+            "codeRepository": "https://github.com/Timothee19/alzheimer-mri-oasis1",
+            "programmingLanguage": "Python",
+            "author": { "@id": "https://timothee19.github.io/#person" }
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "position": 2,
+            "name": "AnkiCardsGenerator",
+            "description": "Générateur automatique de flashcards Anki depuis des cours scientifiques PDF via Knowledge Graph et pipeline multi-agents Mistral API.",
+            "codeRepository": "https://github.com/Timothee19/AnkiCardsGenerator",
+            "programmingLanguage": ["Python", "TypeScript"],
+            "author": { "@id": "https://timothee19.github.io/#person" }
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "position": 3,
+            "name": "Bob-slay",
+            "description": "Prédiction et correction de biais dans l'évaluation motrice de la maladie de Parkinson (score OFF MDS-UPDRS) — Hackathon Probabl x IBM x ESILV.",
+            "codeRepository": "https://github.com/Timothee19/Bob-slay",
+            "programmingLanguage": ["Python", "HTML"],
+            "author": { "@id": "https://timothee19.github.io/#person" }
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "position": 4,
+            "name": "SRGAN",
+            "description": "Implémentation de Super-Resolution GAN (conditionnel et Wasserstein GAN) sous TensorFlow/Keras pour la super-résolution d'images x2 et x4 (TIPE).",
+            "codeRepository": "https://github.com/Timothee19/SRGAN",
+            "programmingLanguage": "Python",
+            "author": { "@id": "https://timothee19.github.io/#person" }
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "position": 5,
+            "name": "NextGenAI",
+            "description": "Projet collaboratif ESILV (DIA3-3) de benchmark et d'évaluation comparative de modèles d'IA générative sur base SQLite.",
+            "codeRepository": "https://github.com/BaptisteWEH/NextGenAI",
+            "programmingLanguage": ["Python", "HTML"],
+            "contributor": { "@id": "https://timothee19.github.io/#person" }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Aller au contenu principal</a>
+
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Accueil Timothée Barselo">
+        <span class="brand-mark" aria-hidden="true">TB</span>
+        <span class="brand-text">Timothee19</span>
+      </a>
+      <nav class="site-nav" aria-label="Navigation principale">
+        <a href="#projets">Projets</a>
+        <a href="#collaborations">Collaborations</a>
+        <a href="#competences">Compétences</a>
+        <a href="#parcours">Parcours</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Basculer le thème clair ou sombre" title="Changer de thème">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <a class="btn btn-sm btn-primary" href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11.05 11.05 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.4-5.26 5.68.42.36.79 1.07.79 2.15 0 1.55-.01 2.8-.01 3.18 0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero -->
+    <section id="top" class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="status-pill">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            Élève-Ingénieur Data &amp; IA · ESILV · Vinci Eco Drive
+          </div>
+          <h1>
+            Timothée Barselo
+            <span class="handle">@Timothee19</span>
+          </h1>
+          <p class="hero-lead">
+            Je conçois des systèmes d'<strong>Intelligence Artificielle</strong>, de <strong>Deep Learning</strong> et de <strong>Machine Learning</strong> — de l'imagerie médicale aux agents LLM — ainsi que des architectures <strong>embarquées &amp; électroniques</strong>.
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#projets">Explorer mes projets</a>
+            <a class="btn btn-ghost" href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">Voir le profil GitHub ↗</a>
+          </div>
+          <dl class="hero-stats" aria-label="Chiffres clés">
+            <div class="stat-item">
+              <dt>Projets créés</dt>
+              <dd>4</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Collaborations</dt>
+              <dd>4</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Dépôts publics</dt>
+              <dd>5</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Domaines</dt>
+              <dd>IA · ML · Embarqué</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="hero-visual">
+          <div class="avatar-card">
+            <img
+              src="https://avatars.githubusercontent.com/u/108196706?v=4"
+              alt="Avatar GitHub de Timothée Barselo (Timothee19)"
+              width="220"
+              height="220"
+              class="avatar-img"
+              loading="eager"
+            >
+            <div class="avatar-meta">
+              <span class="mono-label">github.com/Timothee19</span>
+              <span class="location-tag">Paris · La Défense (ESILV)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Bar + All Projects -->
+    <section id="projets" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Portfolio GitHub</p>
+            <h2>Mes dépôts &amp; collaborations</h2>
+            <p class="section-subtitle">
+              Retrouvez l'ensemble de mes dépôts créés ainsi que les projets sur lesquels j'interviens en tant que collaborateur (académiques et associatifs).
+            </p>
+          </div>
+          <div class="filter-bar" role="toolbar" aria-label="Filtrer les projets">
+            <button class="filter-btn active" type="button" data-filter="all">Tous <span class="count">8</span></button>
+            <button class="filter-btn" type="button" data-filter="owner">Créés par moi <span class="count">4</span></button>
+            <button class="filter-btn" type="button" data-filter="collaborator">Collaborations <span class="count">4</span></button>
+            <button class="filter-btn" type="button" data-filter="ai">IA &amp; Data <span class="count">6</span></button>
+            <button class="filter-btn" type="button" data-filter="embedded">Embarqué <span class="count">2</span></button>
+          </div>
+        </div>
+
+        <!-- Subsection 1: Created by Timothee19 -->
+        <div class="project-group" data-group="owner">
+          <h3 class="group-title">
+            <span class="group-indicator owner-dot" aria-hidden="true"></span>
+            Projets créés par Timothee19
+          </h3>
+          <div class="projects-grid">
+
+            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/alzheimer-mri-oasis1">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-owner">Créateur</span>
+                  <span class="badge badge-public">Public</span>
+                </div>
+                <span class="star-count" data-stars aria-label="Étoiles GitHub"></span>
+              </div>
+              <h4>
+                <a href="https://github.com/Timothee19/alzheimer-mri-oasis1" target="_blank" rel="noopener noreferrer">
+                  alzheimer-mri-oasis1
+                </a>
+              </h4>
+              <p class="card-desc">
+                Analyse exploratoire (EDA) et modélisation Deep Learning (<strong>CNN 2D</strong>, <strong>Attention MIL</strong> sur 61 coupes, <strong>MobileNetV2 2.5D</strong>) sur 86 437 coupes d'IRM cérébrales <strong>OASIS-1</strong> (347 patients), accéléré sur Intel Iris XPU (ITEX).
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>Jupyter Notebook</li>
+                <li>TensorFlow</li>
+                <li>Deep Learning</li>
+                <li>Imagerie Médicale</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-jupyter" aria-hidden="true"></span>Jupyter Notebook</span>
+                <a class="card-link" href="https://github.com/Timothee19/alzheimer-mri-oasis1" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
+              </div>
+            </article>
+
+            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/AnkiCardsGenerator">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-owner">Créateur</span>
+                  <span class="badge badge-public">Public</span>
+                </div>
+                <span class="star-count" data-stars aria-label="Étoiles GitHub">★ 2</span>
+              </div>
+              <h4>
+                <a href="https://github.com/Timothee19/AnkiCardsGenerator" target="_blank" rel="noopener noreferrer">
+                  AnkiCardsGenerator
+                </a>
+              </h4>
+              <p class="card-desc">
+                Génération automatique de decks de flashcards Anki depuis n'importe quel cours PDF scientifique grâce à une architecture <strong>Knowledge Graph</strong>, un pipeline <strong>multi-agents (API Mistral)</strong> et une interface web TypeScript.
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>Python</li>
+                <li>TypeScript</li>
+                <li>Mistral API</li>
+                <li>Multi-Agents</li>
+                <li>Knowledge Graph</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-python" aria-hidden="true"></span>Python / TypeScript</span>
+                <a class="card-link" href="https://github.com/Timothee19/AnkiCardsGenerator" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
+              </div>
+            </article>
+
+            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/Bob-slay">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-owner">Créateur</span>
+                  <span class="badge badge-public">Public</span>
+                </div>
+                <span class="star-count" data-stars aria-label="Étoiles GitHub"></span>
+              </div>
+              <h4>
+                <a href="https://github.com/Timothee19/Bob-slay" target="_blank" rel="noopener noreferrer">
+                  Bob-slay
+                </a>
+              </h4>
+              <p class="card-desc">
+                Projet de Machine Learning (<strong>Bobathon ESILV — Probabl &amp; IBM</strong>) dédié à la prédiction et à la correction de biais dans l'évaluation motrice de la maladie de Parkinson (score réel OFF MDS-UPDRS).
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>Python</li>
+                <li>Machine Learning</li>
+                <li>Santé</li>
+                <li>Probabl × IBM</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-html" aria-hidden="true"></span>HTML / Python</span>
+                <a class="card-link" href="https://github.com/Timothee19/Bob-slay" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
+              </div>
+            </article>
+
+            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/SRGAN">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-owner">Créateur</span>
+                  <span class="badge badge-public">Public</span>
+                </div>
+                <span class="star-count" data-stars aria-label="Étoiles GitHub"></span>
+              </div>
+              <h4>
+                <a href="https://github.com/Timothee19/SRGAN" target="_blank" rel="noopener noreferrer">
+                  SRGAN
+                </a>
+              </h4>
+              <p class="card-desc">
+                Conception et comparaison de deux architectures <strong>Super-Resolution GAN</strong> (conditionnel et <strong>Wasserstein GAN</strong>) sous TensorFlow/Keras pour la super-résolution d'images ×2 et ×4, développées pour mon TIPE.
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>TensorFlow</li>
+                <li>Keras</li>
+                <li>Wasserstein GAN</li>
+                <li>Computer Vision</li>
+                <li>TIPE</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-jupyter" aria-hidden="true"></span>Jupyter Notebook</span>
+                <a class="card-link" href="https://github.com/Timothee19/SRGAN" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- Subsection 2: Collaborator Projects -->
+        <div id="collaborations" class="project-group" data-group="collaborator">
+          <h3 class="group-title">
+            <span class="group-indicator collab-dot" aria-hidden="true"></span>
+            Projets où je suis collaborateur
+          </h3>
+          <div class="projects-grid">
+
+            <article class="project-card" data-role="collaborator" data-domain="ai" data-repo="BaptisteWEH/NextGenAI">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-collab">Collaborateur</span>
+                  <span class="badge badge-public">Public</span>
+                </div>
+                <span class="repo-owner">BaptisteWEH</span>
+              </div>
+              <h4>
+                <a href="https://github.com/BaptisteWEH/NextGenAI" target="_blank" rel="noopener noreferrer">
+                  BaptisteWEH / NextGenAI
+                </a>
+              </h4>
+              <p class="card-desc">
+                Projet collaboratif <strong>ESILV (groupe DIA3-3)</strong> d'évaluation et de benchmark comparatif de 5 modèles d'IA générative sur une base SQLite partagée, avec pipelines reproductibles et rapports analytiques.
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>Python</li>
+                <li>HTML</li>
+                <li>SQLite</li>
+                <li>LLM Benchmarks</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-html" aria-hidden="true"></span>HTML / Python</span>
+                <a class="card-link" href="https://github.com/BaptisteWEH/NextGenAI" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
+              </div>
+            </article>
+
+            <article class="project-card is-private" data-role="collaborator" data-domain="ai">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-collab">Collaborateur</span>
+                  <span class="badge badge-private">Privé</span>
+                </div>
+                <span class="repo-owner">BaptisteWEH</span>
+              </div>
+              <h4>BaptisteWEH / MachineLearningProjectCS2</h4>
+              <p class="card-desc">
+                Prédiction calibrée en temps réel de la probabilité de victoire de round sur <strong>Counter-Strike 2</strong> (dataset CS2RB v1.0) et explicabilité tactique (« Coach Mode ») par décomposition <strong>SHAP</strong> des <em>Win Probability Swings</em> (ESILV A4).
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>Jupyter Notebook</li>
+                <li>SHAP</li>
+                <li>Calibration ML</li>
+                <li>LaTeX</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-jupyter" aria-hidden="true"></span>Jupyter Notebook / LaTeX</span>
+                <span class="private-note" title="Dépôt académique privé">Dépôt privé · Accès restreint</span>
+              </div>
+            </article>
+
+            <article class="project-card is-private" data-role="collaborator" data-domain="embedded">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-collab">Collaborateur</span>
+                  <span class="badge badge-private">Privé</span>
+                </div>
+                <span class="repo-owner">VinciEcoDrive</span>
+              </div>
+              <h4>VinciEcoDrive / TestCapteurCourant</h4>
+              <p class="card-desc">
+                Développement embarqué en <strong>C++ (PlatformIO)</strong> sur microcontrôleur <strong>ESP32</strong> pour l'acquisition et la calibration d'un capteur de courant <strong>ACS770x-050U</strong> destiné au prototype électrique Vinci Eco Drive.
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>C++</li>
+                <li>ESP32</li>
+                <li>PlatformIO</li>
+                <li>Capteurs</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-cpp" aria-hidden="true"></span>C++</span>
+                <span class="private-note" title="Dépôt associatif privé">Dépôt privé · Vinci Eco Drive</span>
+              </div>
+            </article>
+
+            <article class="project-card is-private" data-role="collaborator" data-domain="embedded">
+              <div class="card-top">
+                <div class="badges">
+                  <span class="badge badge-collab">Collaborateur</span>
+                  <span class="badge badge-private">Privé</span>
+                </div>
+                <span class="repo-owner">VinciEcoDrive</span>
+              </div>
+              <h4>VinciEcoDrive / PCB_Steering_Wheel</h4>
+              <p class="card-desc">
+                Conception schématique et routage de circuit imprimé (<strong>PCB</strong>) sous <strong>KiCad</strong> pour le volant instrumenté du véhicule électrique de compétition de l'association <strong>Vinci Eco Drive</strong>.
+              </p>
+              <ul class="tag-list" aria-label="Technologies utilisées">
+                <li>KiCad</li>
+                <li>PCB Design</li>
+                <li>Hardware</li>
+                <li>Électronique</li>
+              </ul>
+              <div class="card-footer">
+                <span class="lang"><span class="lang-dot lang-hardware" aria-hidden="true"></span>KiCad / Hardware</span>
+                <span class="private-note" title="Dépôt associatif privé">Dépôt privé · Vinci Eco Drive</span>
+              </div>
+            </article>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section id="competences" class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Stack Technique</p>
+            <h2>Compétences &amp; Outils</h2>
+          </div>
+        </div>
+        <div class="skills-grid">
+          <div class="skill-card">
+            <h3>IA &amp; Deep Learning</h3>
+            <p>Architectures neuronales, vision par ordinateur et systèmes multi-agents.</p>
+            <ul class="tag-list">
+              <li>TensorFlow / Keras</li>
+              <li>CNN &amp; Attention MIL</li>
+              <li>GAN / WGAN</li>
+              <li>Mistral API / LLMs</li>
+              <li>Knowledge Graphs</li>
+            </ul>
+          </div>
+          <div class="skill-card">
+            <h3>Data Science &amp; ML</h3>
+            <p>Analyse exploratoire, modélisation tabulaire, calibration et explicabilité.</p>
+            <ul class="tag-list">
+              <li>Python</li>
+              <li>Jupyter Notebook</li>
+              <li>Scikit-learn</li>
+              <li>SHAP (XAI)</li>
+              <li>SQLite</li>
+            </ul>
+          </div>
+          <div class="skill-card">
+            <h3>Développement &amp; Web</h3>
+            <p>Interfaces web modernes, outillage scientifique et rédaction technique.</p>
+            <ul class="tag-list">
+              <li>TypeScript</li>
+              <li>HTML5 / CSS3</li>
+              <li>Git / GitHub</li>
+              <li>Linux</li>
+              <li>LaTeX</li>
+            </ul>
+          </div>
+          <div class="skill-card">
+            <h3>Embarqué &amp; Hardware</h3>
+            <p>Conception électronique et firmware pour véhicules électriques.</p>
+            <ul class="tag-list">
+              <li>C / C++</li>
+              <li>ESP32</li>
+              <li>PlatformIO</li>
+              <li>KiCad (PCB)</li>
+              <li>Instrumentation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Experience / Background -->
+    <section id="parcours" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Parcours &amp; Engagement</p>
+            <h2>Formation &amp; Association</h2>
+          </div>
+        </div>
+        <div class="timeline-grid">
+          <article class="timeline-card">
+            <span class="timeline-badge">Formation</span>
+            <h3>ESILV — Majeure Data &amp; Intelligence Artificielle</h3>
+            <p>
+              École Supérieure d'Ingénieurs Léonard de Vinci (Paris La Défense). Spécialisation en Machine Learning, Deep Learning, IA générative et ingénierie des données.
+            </p>
+          </article>
+          <article class="timeline-card">
+            <span class="timeline-badge">Association</span>
+            <h3>Vinci Eco Drive — Pôle Systèmes Embarqués</h3>
+            <p>
+              Membre contributeur de l'association de conception de véhicules électriques à haute efficacité énergétique (Shell Eco-marathon &amp; Formula Student) : capteurs ESP32 en C++ et conception de PCB sous KiCad.
+            </p>
+          </article>
+          <article class="timeline-card">
+            <span class="timeline-badge">Recherche &amp; Concours</span>
+            <h3>Hackathons IA &amp; TIPE</h3>
+            <p>
+              Participation au Bobathon ESILV (Probabl × IBM) sur la maladie de Parkinson et développement d'un Wasserstein SRGAN en classes préparatoires scientifiques.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-title">Timothée Barselo <span class="mono-label">@Timothee19</span></p>
+        <p class="footer-copy">Portfolio hébergé sur GitHub Pages · Optimisé pour la performance et le référencement.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/Timothee19?tab=repositories" target="_blank" rel="noopener noreferrer">Dépôts</a>
+        <a href="#top">Haut de page ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
