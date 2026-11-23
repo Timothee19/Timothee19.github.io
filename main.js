@@ -1122,7 +1122,7 @@
       'edu.cpge.desc': "Reçu au concours <strong>CCINP avec 516 points</strong>. Délégué et représentant élu des classes préparatoires au conseil d'administration.",
       'contact.title': 'Discutons de votre prochain projet IA',
       'contact.desc': "Je recherche un <strong>stage de 5 mois (12 avril – 7 septembre 2027)</strong> en Recherche IA, Machine Learning, Data Science ou MLOps. N'hésitez pas à me contacter !",
-      'footer.rights': 'Conçu avec soin & WebGL 3D.',
+      'footer.rights': 'Réalisé avec Gemini 4 Neon.',
       'footer.top': '↑ Haut de page',
       'toast.copied': 'Email copié dans le presse-papiers !'
     },
@@ -1229,7 +1229,7 @@
       'edu.cpge.desc': 'Admitted to <strong>CCINP with 516 points</strong>. Class representative & elected preparatory classes representative to the Board of Governors.',
       'contact.title': "Let's build your next AI project",
       'contact.desc': 'Looking for a <strong>5-month internship (April 12 – September 7, 2027)</strong> in AI Research, Machine Learning, Data Science, or MLOps. Feel free to reach out!',
-      'footer.rights': 'Crafted with care & 3D WebGL.',
+      'footer.rights': 'Built with Gemini 4 Neon.',
       'footer.top': '↑ Back to top',
       'toast.copied': 'Email copied to clipboard!'
     }
