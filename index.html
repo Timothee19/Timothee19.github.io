@@ -1,598 +1,692 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr" data-lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Timothée Barselo (Timothee19) — Portfolio IA, Data Science &amp; Systèmes Embarqués</title>
-  <meta name="description" content="Portfolio GitHub de Timothée Barselo (@Timothee19), élève-ingénieur Data &amp; IA à l'ESILV et membre de Vinci Eco Drive. Projets Deep Learning, LLM multi-agents, Machine Learning et systèmes embarqués.">
-  <meta name="keywords" content="Timothée Barselo, Timothee19, ESILV, Data Science, Intelligence Artificielle, Deep Learning, Machine Learning, TensorFlow, Python, Mistral AI, SHAP, Vinci Eco Drive, ESP32, KiCad, Portfolio GitHub">
-  <meta name="author" content="Timothée Barselo">
-  <meta name="robots" content="index, follow, max-image-preview:large">
-  <meta name="theme-color" content="#0b0f19">
-  <link rel="canonical" href="https://timothee19.github.io/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timothée Soulez Barselo — Ingénieur IA, Data Science &amp; MLOps</title>
+  <meta name="description" content="Portfolio de Timothée Soulez Barselo — Étudiant ingénieur Data &amp; IA à l'ESILV. Systèmes agentiques LLM, Deep Learning (SRGAN, IRM Alzheimer) et pipelines MLOps." />
+  <meta name="theme-color" content="#0b0d11" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="fr_FR">
-  <meta property="og:site_name" content="Timothée Barselo — Portfolio">
-  <meta property="og:title" content="Timothée Barselo (@Timothee19) — IA, Data Science &amp; Systèmes Embarqués">
-  <meta property="og:description" content="Découvrez mes projets open-source et collaborations : Deep Learning médical (Alzheimer OASIS-1), générateur Anki multi-agents, SRGAN, IA explicable CS2 et électronique embarquée Vinci Eco Drive.">
-  <meta property="og:url" content="https://timothee19.github.io/">
-  <meta property="og:image" content="https://avatars.githubusercontent.com/u/108196706?v=4">
+  <meta property="og:title" content="Timothée Soulez Barselo — Portfolio IA &amp; Data Science" />
+  <meta property="og:description" content="Ingénieur Recherche IA, Machine Learning, Data Science &amp; MLOps — ESILV." />
+  <meta property="og:type" content="website" />
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Timothée Barselo (@Timothee19) — Portfolio GitHub">
-  <meta name="twitter:description" content="Projets IA, Deep Learning, Machine Learning &amp; Systèmes Embarqués — ESILV &amp; Vinci Eco Drive.">
-  <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/108196706?v=4">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Structured Data (JSON-LD) for SEO -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        "@id": "https://timothee19.github.io/#person",
-        "name": "Timothée Barselo",
-        "alternateName": "Timothee19",
-        "url": "https://timothee19.github.io/",
-        "image": "https://avatars.githubusercontent.com/u/108196706?v=4",
-        "jobTitle": "Élève-Ingénieur Data & Intelligence Artificielle",
-        "affiliation": [
-          {
-            "@type": "EducationalOrganization",
-            "name": "ESILV — École Supérieure d'Ingénieurs Léonard de Vinci"
-          },
-          {
-            "@type": "Organization",
-            "name": "Vinci Eco Drive"
-          }
-        ],
-        "sameAs": [
-          "https://github.com/Timothee19"
-        ],
-        "knowsAbout": [
-          "Deep Learning",
-          "Machine Learning",
-          "Computer Vision",
-          "Large Language Models",
-          "Explainable AI (SHAP)",
-          "Python",
-          "TensorFlow",
-          "Embedded Systems",
-          "ESP32",
-          "KiCad PCB Design"
-        ]
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://timothee19.github.io/#website",
-        "url": "https://timothee19.github.io/",
-        "name": "Timothée Barselo — Portfolio GitHub",
-        "inLanguage": "fr-FR",
-        "publisher": { "@id": "https://timothee19.github.io/#person" }
-      },
-      {
-        "@type": "ItemList",
-        "name": "Projets GitHub de Timothée Barselo",
-        "itemListElement": [
-          {
-            "@type": "SoftwareSourceCode",
-            "position": 1,
-            "name": "alzheimer-mri-oasis1",
-            "description": "EDA et modélisation Deep Learning (CNN 2D, Attention MIL 61 coupes, MobileNetV2 2.5D) sur IRM Alzheimer OASIS-1 sous TensorFlow.",
-            "codeRepository": "https://github.com/Timothee19/alzheimer-mri-oasis1",
-            "programmingLanguage": "Python",
-            "author": { "@id": "https://timothee19.github.io/#person" }
-          },
-          {
-            "@type": "SoftwareSourceCode",
-            "position": 2,
-            "name": "AnkiCardsGenerator",
-            "description": "Générateur automatique de flashcards Anki depuis des cours scientifiques PDF via Knowledge Graph et pipeline multi-agents Mistral API.",
-            "codeRepository": "https://github.com/Timothee19/AnkiCardsGenerator",
-            "programmingLanguage": ["Python", "TypeScript"],
-            "author": { "@id": "https://timothee19.github.io/#person" }
-          },
-          {
-            "@type": "SoftwareSourceCode",
-            "position": 3,
-            "name": "Bob-slay",
-            "description": "Prédiction et correction de biais dans l'évaluation motrice de la maladie de Parkinson (score OFF MDS-UPDRS) — Hackathon Probabl x IBM x ESILV.",
-            "codeRepository": "https://github.com/Timothee19/Bob-slay",
-            "programmingLanguage": ["Python", "HTML"],
-            "author": { "@id": "https://timothee19.github.io/#person" }
-          },
-          {
-            "@type": "SoftwareSourceCode",
-            "position": 4,
-            "name": "SRGAN",
-            "description": "Implémentation de Super-Resolution GAN (conditionnel et Wasserstein GAN) sous TensorFlow/Keras pour la super-résolution d'images x2 et x4 (TIPE).",
-            "codeRepository": "https://github.com/Timothee19/SRGAN",
-            "programmingLanguage": "Python",
-            "author": { "@id": "https://timothee19.github.io/#person" }
-          },
-          {
-            "@type": "SoftwareSourceCode",
-            "position": 5,
-            "name": "NextGenAI",
-            "description": "Projet collaboratif ESILV (DIA3-3) de benchmark et d'évaluation comparative de modèles d'IA générative sur base SQLite.",
-            "codeRepository": "https://github.com/BaptisteWEH/NextGenAI",
-            "programmingLanguage": ["Python", "HTML"],
-            "contributor": { "@id": "https://timothee19.github.io/#person" }
-          }
-        ]
-      }
-    ]
-  }
-  </script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Aller au contenu principal</a>
+  <!-- Scroll progress bar -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
-  <div class="ambient-glow" aria-hidden="true"></div>
+  <!-- Custom ambient cursor glow (desktop only) -->
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="#top" aria-label="Accueil Timothée Barselo">
-        <span class="brand-mark" aria-hidden="true">TB</span>
-        <span class="brand-text">Timothee19</span>
+  <!-- Lightweight ambient particle canvas -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Subtle copper-blue & copper ambient lighting -->
+  <div class="ambient-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Floating Apple Glass Navbar -->
+  <header class="navbar" id="navbar">
+    <div class="nav-inner glass">
+      <a href="#hero" class="nav-brand" aria-label="Accueil">
+        <span class="brand-dot"></span>
+        <span class="brand-text">Timothée<span class="accent">.</span></span>
       </a>
-      <nav class="site-nav" aria-label="Navigation principale">
-        <a href="#projets">Projets</a>
-        <a href="#collaborations">Collaborations</a>
-        <a href="#competences">Compétences</a>
-        <a href="#parcours">Parcours</a>
+
+      <nav class="nav-links" id="navLinks" aria-label="Navigation principale">
+        <a href="#about" class="nav-link" data-i18n="nav.about">À propos</a>
+        <a href="#experience" class="nav-link" data-i18n="nav.experience">Expériences</a>
+        <a href="#projects" class="nav-link" data-i18n="nav.projects">Projets</a>
+        <a href="#skills" class="nav-link" data-i18n="nav.skills">Compétences</a>
+        <a href="#education" class="nav-link" data-i18n="nav.education">Formations</a>
+        <a href="#contact" class="nav-link" data-i18n="nav.contact">Contact</a>
       </nav>
-      <div class="header-actions">
-        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Basculer le thème clair ou sombre" title="Changer de thème">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-          </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
+
+      <div class="nav-actions">
+        <button class="lang-toggle glass-pill" id="langToggle" type="button" aria-label="Switch language">
+          <span class="lang-opt active" data-set="fr">FR</span>
+          <span class="lang-sep">/</span>
+          <span class="lang-opt" data-set="en">EN</span>
         </button>
-        <a class="btn btn-sm btn-primary" href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11.05 11.05 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.4-5.26 5.68.42.36.79 1.07.79 2.15 0 1.55-.01 2.8-.01 3.18 0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
-          GitHub
+        <a href="assets/CV_Timothee_Soulez_Barselo.pdf" download class="btn btn-sm btn-primary nav-cv">
+          <span data-i18n="nav.cv">CV</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </a>
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
+    </div>
+
+    <!-- Mobile drawer -->
+    <div class="mobile-menu glass" id="mobileMenu">
+      <a href="#about" class="mobile-link" data-i18n="nav.about">À propos</a>
+      <a href="#experience" class="mobile-link" data-i18n="nav.experience">Expériences</a>
+      <a href="#projects" class="mobile-link" data-i18n="nav.projects">Projets</a>
+      <a href="#skills" class="mobile-link" data-i18n="nav.skills">Compétences</a>
+      <a href="#education" class="mobile-link" data-i18n="nav.education">Formations</a>
+      <a href="#contact" class="mobile-link" data-i18n="nav.contact">Contact</a>
+      <a href="assets/CV_Timothee_Soulez_Barselo.pdf" download class="btn btn-primary mobile-cv" data-i18n="hero.cta_cv">Télécharger mon CV</a>
     </div>
   </header>
 
-  <main id="main-content">
-    <!-- Hero -->
-    <section id="top" class="hero">
+  <main>
+    <!-- ==================== HERO ==================== -->
+    <section id="hero" class="hero section">
       <div class="container hero-grid">
-        <div class="hero-content">
-          <div class="status-pill">
-            <span class="pulse-dot" aria-hidden="true"></span>
-            Élève-Ingénieur Data &amp; IA · ESILV · Vinci Eco Drive
+        <div class="hero-content reveal">
+          <div class="status-pill glass-pill">
+            <span class="pulse-dot"></span>
+            <span data-i18n="hero.status">Disponible — Stage 5 mois (12 avr. – 7 sept. 2027)</span>
           </div>
-          <h1>
-            Timothée Barselo
-            <span class="handle">@Timothee19</span>
+
+          <h1 class="hero-title">
+            <span class="hero-greeting" data-i18n="hero.greeting">Bonjour, je suis</span>
+            <span class="gradient-text">Timothée Soulez Barselo</span>
           </h1>
-          <p class="hero-lead">
-            Je conçois des systèmes d'<strong>Intelligence Artificielle</strong>, de <strong>Deep Learning</strong> et de <strong>Machine Learning</strong> — de l'imagerie médicale aux agents LLM — ainsi que des architectures <strong>embarquées &amp; électroniques</strong>.
+
+          <div class="hero-role-wrap">
+            <span class="mono-prefix">&gt;_</span>
+            <span class="hero-role" id="typewriterRole">Architecte de Systèmes Agentiques LLM</span>
+            <span class="type-cursor" aria-hidden="true">|</span>
+          </div>
+
+          <p class="hero-desc" data-i18n="hero.desc">
+            Étudiant ingénieur en <strong>Data &amp; IA à l'ESILV</strong>. Je conçois des
+            <strong>systèmes agentiques LLM</strong>, des architectures de <strong>Deep Learning</strong>
+            et des <strong>pipelines MLOps end-to-end</strong> prêts pour la production.
           </p>
+
           <div class="hero-cta">
-            <a class="btn btn-primary" href="#projets">Explorer mes projets</a>
-            <a class="btn btn-ghost" href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">Voir le profil GitHub ↗</a>
+            <a href="#projects" class="btn btn-primary btn-glow">
+              <span data-i18n="hero.cta_projects">Explorer mes projets</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="assets/CV_Timothee_Soulez_Barselo.pdf" download class="btn btn-glass">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span data-i18n="hero.cta_cv">Télécharger mon CV</span>
+            </a>
           </div>
-          <dl class="hero-stats" aria-label="Chiffres clés">
-            <div class="stat-item">
-              <dt>Projets créés</dt>
-              <dd>4</dd>
-            </div>
-            <div class="stat-item">
-              <dt>Collaborations</dt>
-              <dd>4</dd>
-            </div>
-            <div class="stat-item">
-              <dt>Dépôts publics</dt>
-              <dd>5</dd>
-            </div>
-            <div class="stat-item">
-              <dt>Domaines</dt>
-              <dd>IA · ML · Embarqué</dd>
-            </div>
-          </dl>
+
+          <div class="hero-socials">
+            <a href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer" class="social-pill glass-pill" aria-label="GitHub">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              <span>GitHub</span>
+            </a>
+            <a href="https://gitlab.com/Timothee19" target="_blank" rel="noopener noreferrer" class="social-pill glass-pill" aria-label="GitLab">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.955 13.587l-1.342-4.135-2.664-8.189a.455.455 0 0 0-.867 0L16.418 9.45H7.582L4.918 1.263a.455.455 0 0 0-.867 0L1.386 9.452.045 13.587a.924.924 0 0 0 .331 1.023L12 23.054l11.624-8.443a.92.92 0 0 0 .331-1.024"/></svg>
+              <span>GitLab</span>
+            </a>
+            <a href="https://www.linkedin.com/in/timoth%C3%A9e-soulez-barselo-a777b7279" target="_blank" rel="noopener noreferrer" class="social-pill glass-pill" aria-label="LinkedIn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              <span>LinkedIn</span>
+            </a>
+            <a href="mailto:tim.barselo@gmail.com" class="social-pill glass-pill" aria-label="Email">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <span>Email</span>
+            </a>
+          </div>
         </div>
-        <div class="hero-visual">
-          <div class="avatar-card">
-            <img
-              src="https://avatars.githubusercontent.com/u/108196706?v=4"
-              alt="Avatar GitHub de Timothée Barselo (Timothee19)"
-              width="220"
-              height="220"
-              class="avatar-img"
-              loading="eager"
-            >
-            <div class="avatar-meta">
-              <span class="mono-label">github.com/Timothee19</span>
-              <span class="location-tag">Paris · La Défense (ESILV)</span>
+
+        <!-- Synchronized 3D Morphing Stage (Synced with Typewriter Role Loop) -->
+        <div class="hero-stage glass reveal">
+          <div class="stage-top-badge">
+            <span class="stage-sync-dot"></span>
+            <span class="mono" id="hero3dLabel" data-i18n="stage.agents">Architecture Système — Orchestration Agents IA</span>
+          </div>
+          <canvas id="hero-3d" class="stage-canvas"></canvas>
+          <div class="stage-toolbar">
+            <div class="stage-modes" role="group" aria-label="Facette 3D">
+              <button type="button" class="stage-btn active" data-facet="0" data-i18n="stage.btn0">Architecture</button>
+              <button type="button" class="stage-btn" data-facet="1" data-i18n="stage.btn1">Deep Learning</button>
+              <button type="button" class="stage-btn" data-facet="2" data-i18n="stage.btn2">MLOps</button>
+              <button type="button" class="stage-btn" data-facet="3" data-i18n="stage.btn3">Quantum</button>
             </div>
+            <span class="stage-hint mono" data-i18n="hero.hint">Glisser pour pivoter</span>
           </div>
         </div>
       </div>
+
+      <a href="#about" class="scroll-down" aria-label="Défiler vers la section À propos">
+        <span class="mouse"><span class="wheel"></span></span>
+      </a>
     </section>
 
-    <!-- Filter Bar + All Projects -->
-    <section id="projets" class="section">
+    <!-- ==================== À PROPOS DE MOI ==================== -->
+    <section id="about" class="section">
       <div class="container">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Portfolio GitHub</p>
-            <h2>Mes dépôts &amp; collaborations</h2>
-            <p class="section-subtitle">
-              Retrouvez l'ensemble de mes dépôts créés ainsi que les projets sur lesquels j'interviens en tant que collaborateur (académiques et associatifs).
+        <div class="section-header reveal">
+          <span class="section-tag mono">01 // <span data-i18n="about.tag">À PROPOS</span></span>
+          <h2 class="section-title" data-i18n="about.title">À propos de moi</h2>
+        </div>
+
+        <div class="about-bento">
+          <!-- Profile Morphing Card -->
+          <div class="glass card-tilt about-photo-card reveal">
+            <div class="morph-frame">
+              <div class="morph-glow"></div>
+              <img
+                src="assets/profile.jpg"
+                alt="Portrait de Timothée Soulez Barselo"
+                class="profile-img"
+                loading="lazy"
+              />
+            </div>
+            <div class="about-identity">
+              <h3>Timothée Soulez Barselo</h3>
+              <p class="mono muted">ESILV • Majeure Data &amp; IA (English Track)</p>
+              <div class="location-badge glass-pill">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>La Garenne-Colombes (92), France</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio Glass Card -->
+          <div class="glass card-tilt about-bio-card reveal">
+            <h3 class="about-subtitle" data-i18n="about.subtitle">
+              Allier rigueur scientifique, R&amp;D en IA et industrialisation MLOps
+            </h3>
+            <p data-i18n="about.p1">
+              Étudiant en 2<sup>e</sup> année de cycle ingénieur à l'<strong>ESILV</strong> (Majeure Data &amp; IA, English Track, avec une mineure en <strong>Quantum Computing</strong>), issu d'une classe préparatoire scientifique <strong>MPSI/MP</strong> (Lycée Claude Bernard) et enrichi d'un semestre d'échange académique à <strong>Hanyang University (Séoul)</strong>.
+            </p>
+            <p data-i18n="about.p2">
+              Formé lors d'un premier stage en <strong>Data Science &amp; MLOps chez Atos</strong>, je conçois des systèmes agentiques (orchestration d'agents LLM via l'API Mistral) ainsi que des pipelines MLOps complets (Python, FastAPI, Docker, Kubernetes, GitLab CI/CD). Habitué à collaborer en équipes pluridisciplinaires, j'aime autant l'exploration R&amp;D que la traduction de besoins métiers en solutions IA fiables et industrialisées.
             </p>
           </div>
-          <div class="filter-bar" role="toolbar" aria-label="Filtrer les projets">
-            <button class="filter-btn active" type="button" data-filter="all">Tous <span class="count">8</span></button>
-            <button class="filter-btn" type="button" data-filter="owner">Créés par moi <span class="count">4</span></button>
-            <button class="filter-btn" type="button" data-filter="collaborator">Collaborations <span class="count">4</span></button>
-            <button class="filter-btn" type="button" data-filter="ai">IA &amp; Data <span class="count">6</span></button>
-            <button class="filter-btn" type="button" data-filter="embedded">Embarqué <span class="count">2</span></button>
+
+          <!-- 4 Profile-Focused Cards -->
+          <div class="glass card-tilt profile-card reveal">
+            <span class="profile-card-tag mono" data-i18n="about.c1.tag">International</span>
+            <h4 data-i18n="about.c1.title">Paris ↔ Séoul</h4>
+            <p data-i18n="about.c1.desc">Cursus ESILV en English Track complété par un semestre d'échange à Hanyang University (Corée du Sud).</p>
           </div>
-        </div>
 
-        <!-- Subsection 1: Created by Timothee19 -->
-        <div class="project-group" data-group="owner">
-          <h3 class="group-title">
-            <span class="group-indicator owner-dot" aria-hidden="true"></span>
-            Projets créés par Timothee19
-          </h3>
-          <div class="projects-grid">
-
-            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/alzheimer-mri-oasis1">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-owner">Créateur</span>
-                  <span class="badge badge-public">Public</span>
-                </div>
-                <span class="star-count" data-stars aria-label="Étoiles GitHub"></span>
-              </div>
-              <h4>
-                <a href="https://github.com/Timothee19/alzheimer-mri-oasis1" target="_blank" rel="noopener noreferrer">
-                  alzheimer-mri-oasis1
-                </a>
-              </h4>
-              <p class="card-desc">
-                Analyse exploratoire (EDA) et modélisation Deep Learning (<strong>CNN 2D</strong>, <strong>Attention MIL</strong> sur 61 coupes, <strong>MobileNetV2 2.5D</strong>) sur 86 437 coupes d'IRM cérébrales <strong>OASIS-1</strong> (347 patients), accéléré sur Intel Iris XPU (ITEX).
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>Jupyter Notebook</li>
-                <li>TensorFlow</li>
-                <li>Deep Learning</li>
-                <li>Imagerie Médicale</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-jupyter" aria-hidden="true"></span>Jupyter Notebook</span>
-                <a class="card-link" href="https://github.com/Timothee19/alzheimer-mri-oasis1" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
-              </div>
-            </article>
-
-            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/AnkiCardsGenerator">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-owner">Créateur</span>
-                  <span class="badge badge-public">Public</span>
-                </div>
-                <span class="star-count" data-stars aria-label="Étoiles GitHub">★ 2</span>
-              </div>
-              <h4>
-                <a href="https://github.com/Timothee19/AnkiCardsGenerator" target="_blank" rel="noopener noreferrer">
-                  AnkiCardsGenerator
-                </a>
-              </h4>
-              <p class="card-desc">
-                Génération automatique de decks de flashcards Anki depuis n'importe quel cours PDF scientifique grâce à une architecture <strong>Knowledge Graph</strong>, un pipeline <strong>multi-agents (API Mistral)</strong> et une interface web TypeScript.
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>Python</li>
-                <li>TypeScript</li>
-                <li>Mistral API</li>
-                <li>Multi-Agents</li>
-                <li>Knowledge Graph</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-python" aria-hidden="true"></span>Python / TypeScript</span>
-                <a class="card-link" href="https://github.com/Timothee19/AnkiCardsGenerator" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
-              </div>
-            </article>
-
-            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/Bob-slay">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-owner">Créateur</span>
-                  <span class="badge badge-public">Public</span>
-                </div>
-                <span class="star-count" data-stars aria-label="Étoiles GitHub"></span>
-              </div>
-              <h4>
-                <a href="https://github.com/Timothee19/Bob-slay" target="_blank" rel="noopener noreferrer">
-                  Bob-slay
-                </a>
-              </h4>
-              <p class="card-desc">
-                Projet de Machine Learning (<strong>Bobathon ESILV — Probabl &amp; IBM</strong>) dédié à la prédiction et à la correction de biais dans l'évaluation motrice de la maladie de Parkinson (score réel OFF MDS-UPDRS).
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>Python</li>
-                <li>Machine Learning</li>
-                <li>Santé</li>
-                <li>Probabl × IBM</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-html" aria-hidden="true"></span>HTML / Python</span>
-                <a class="card-link" href="https://github.com/Timothee19/Bob-slay" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
-              </div>
-            </article>
-
-            <article class="project-card" data-role="owner" data-domain="ai" data-repo="Timothee19/SRGAN">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-owner">Créateur</span>
-                  <span class="badge badge-public">Public</span>
-                </div>
-                <span class="star-count" data-stars aria-label="Étoiles GitHub"></span>
-              </div>
-              <h4>
-                <a href="https://github.com/Timothee19/SRGAN" target="_blank" rel="noopener noreferrer">
-                  SRGAN
-                </a>
-              </h4>
-              <p class="card-desc">
-                Conception et comparaison de deux architectures <strong>Super-Resolution GAN</strong> (conditionnel et <strong>Wasserstein GAN</strong>) sous TensorFlow/Keras pour la super-résolution d'images ×2 et ×4, développées pour mon TIPE.
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>TensorFlow</li>
-                <li>Keras</li>
-                <li>Wasserstein GAN</li>
-                <li>Computer Vision</li>
-                <li>TIPE</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-jupyter" aria-hidden="true"></span>Jupyter Notebook</span>
-                <a class="card-link" href="https://github.com/Timothee19/SRGAN" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
-              </div>
-            </article>
-
+          <div class="glass card-tilt profile-card reveal">
+            <span class="profile-card-tag mono" data-i18n="about.c2.tag">Langues</span>
+            <h4 data-i18n="about.c2.title">Trilingue en devenir</h4>
+            <p data-i18n="about.c2.desc">Français (natif), Anglais courant (TOEIC 820 B2+) et Chinois (intermédiaire).</p>
           </div>
-        </div>
 
-        <!-- Subsection 2: Collaborator Projects -->
-        <div id="collaborations" class="project-group" data-group="collaborator">
-          <h3 class="group-title">
-            <span class="group-indicator collab-dot" aria-hidden="true"></span>
-            Projets où je suis collaborateur
-          </h3>
-          <div class="projects-grid">
+          <div class="glass card-tilt profile-card reveal">
+            <span class="profile-card-tag mono" data-i18n="about.c3.tag">Engagements</span>
+            <h4 data-i18n="about.c3.title">Leadership &amp; Collectif</h4>
+            <p data-i18n="about.c3.desc">Délégué TD et membre de la commission de vie étudiante de l'ESILV, ex-représentant élu des classes prépa au conseil d'administration, membre Vinci Eco Drive et professeur chez Acadomia.</p>
+          </div>
 
-            <article class="project-card" data-role="collaborator" data-domain="ai" data-repo="BaptisteWEH/NextGenAI">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-collab">Collaborateur</span>
-                  <span class="badge badge-public">Public</span>
-                </div>
-                <span class="repo-owner">BaptisteWEH</span>
-              </div>
-              <h4>
-                <a href="https://github.com/BaptisteWEH/NextGenAI" target="_blank" rel="noopener noreferrer">
-                  BaptisteWEH / NextGenAI
-                </a>
-              </h4>
-              <p class="card-desc">
-                Projet collaboratif <strong>ESILV (groupe DIA3-3)</strong> d'évaluation et de benchmark comparatif de 5 modèles d'IA générative sur une base SQLite partagée, avec pipelines reproductibles et rapports analytiques.
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>Python</li>
-                <li>HTML</li>
-                <li>SQLite</li>
-                <li>LLM Benchmarks</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-html" aria-hidden="true"></span>HTML / Python</span>
-                <a class="card-link" href="https://github.com/BaptisteWEH/NextGenAI" target="_blank" rel="noopener noreferrer">Voir le dépôt ↗</a>
-              </div>
-            </article>
-
-            <article class="project-card is-private" data-role="collaborator" data-domain="ai">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-collab">Collaborateur</span>
-                  <span class="badge badge-private">Privé</span>
-                </div>
-                <span class="repo-owner">BaptisteWEH</span>
-              </div>
-              <h4>BaptisteWEH / MachineLearningProjectCS2</h4>
-              <p class="card-desc">
-                Prédiction calibrée en temps réel de la probabilité de victoire de round sur <strong>Counter-Strike 2</strong> (dataset CS2RB v1.0) et explicabilité tactique (« Coach Mode ») par décomposition <strong>SHAP</strong> des <em>Win Probability Swings</em> (ESILV A4).
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>Jupyter Notebook</li>
-                <li>SHAP</li>
-                <li>Calibration ML</li>
-                <li>LaTeX</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-jupyter" aria-hidden="true"></span>Jupyter Notebook / LaTeX</span>
-                <span class="private-note" title="Dépôt académique privé">Dépôt privé · Accès restreint</span>
-              </div>
-            </article>
-
-            <article class="project-card is-private" data-role="collaborator" data-domain="embedded">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-collab">Collaborateur</span>
-                  <span class="badge badge-private">Privé</span>
-                </div>
-                <span class="repo-owner">VinciEcoDrive</span>
-              </div>
-              <h4>VinciEcoDrive / TestCapteurCourant</h4>
-              <p class="card-desc">
-                Développement embarqué en <strong>C++ (PlatformIO)</strong> sur microcontrôleur <strong>ESP32</strong> pour l'acquisition et la calibration d'un capteur de courant <strong>ACS770x-050U</strong> destiné au prototype électrique Vinci Eco Drive.
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>C++</li>
-                <li>ESP32</li>
-                <li>PlatformIO</li>
-                <li>Capteurs</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-cpp" aria-hidden="true"></span>C++</span>
-                <span class="private-note" title="Dépôt associatif privé">Dépôt privé · Vinci Eco Drive</span>
-              </div>
-            </article>
-
-            <article class="project-card is-private" data-role="collaborator" data-domain="embedded">
-              <div class="card-top">
-                <div class="badges">
-                  <span class="badge badge-collab">Collaborateur</span>
-                  <span class="badge badge-private">Privé</span>
-                </div>
-                <span class="repo-owner">VinciEcoDrive</span>
-              </div>
-              <h4>VinciEcoDrive / PCB_Steering_Wheel</h4>
-              <p class="card-desc">
-                Conception schématique et routage de circuit imprimé (<strong>PCB</strong>) sous <strong>KiCad</strong> pour le volant instrumenté du véhicule électrique de compétition de l'association <strong>Vinci Eco Drive</strong>.
-              </p>
-              <ul class="tag-list" aria-label="Technologies utilisées">
-                <li>KiCad</li>
-                <li>PCB Design</li>
-                <li>Hardware</li>
-                <li>Électronique</li>
-              </ul>
-              <div class="card-footer">
-                <span class="lang"><span class="lang-dot lang-hardware" aria-hidden="true"></span>KiCad / Hardware</span>
-                <span class="private-note" title="Dépôt associatif privé">Dépôt privé · Vinci Eco Drive</span>
-              </div>
-            </article>
-
+          <div class="glass card-tilt profile-card reveal">
+            <span class="profile-card-tag mono" data-i18n="about.c4.tag">Objectif 2027</span>
+            <h4 data-i18n="about.c4.title">Stage de 5 mois</h4>
+            <p data-i18n="about.c4.desc">Disponible du 12 avril au 7 septembre 2027 en Recherche IA, Machine Learning, Data Science ou MLOps.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Skills -->
-    <section id="competences" class="section section-alt">
+    <!-- ==================== EXPÉRIENCES ==================== -->
+    <section id="experience" class="section">
       <div class="container">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Stack Technique</p>
-            <h2>Compétences &amp; Outils</h2>
-          </div>
+        <div class="section-header reveal">
+          <span class="section-tag mono">02 // <span data-i18n="exp.tag">EXPÉRIENCES</span></span>
+          <h2 class="section-title" data-i18n="exp.title">Expériences Professionnelles &amp; Associatives</h2>
         </div>
+
+        <div class="timeline">
+          <!-- Atos -->
+          <article class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="glass card-tilt timeline-card">
+              <div class="card-top">
+                <div>
+                  <span class="badge badge-blue" data-i18n="exp.atos.type">Stage</span>
+                  <h3 data-i18n="exp.atos.role">Data Scientist / MLOps Engineer</h3>
+                  <p class="card-org">Atos (Data &amp; AI) — Bezons, FR</p>
+                </div>
+                <span class="card-date mono" data-i18n="exp.atos.date">Juil 2026 – Août 2026</span>
+              </div>
+              <ul class="card-list">
+                <li data-i18n="exp.atos.b1"><strong>Modélisation :</strong> Optimisation d'un modèle GradientBoosting (<strong>ROC AUC : 0,865</strong>, <strong>Rappel : 78 %</strong>) via feature engineering et tuning d'hyperparamètres.</li>
+                <li data-i18n="exp.atos.b2"><strong>API &amp; Inférence :</strong> Développement d'une API REST Python (FastAPI) intégrant le service de scoring et l'interface utilisateur.</li>
+                <li data-i18n="exp.atos.b3"><strong>MLOps &amp; CI/CD :</strong> Conteneurisation (Docker), déploiement sur Kubernetes (Minikube) et automatisation des tests ML et du registre d'images (Nexus) via GitLab CI/CD.</li>
+              </ul>
+              <div class="tag-row">
+                <span class="tech-tag">Python</span>
+                <span class="tech-tag">Scikit-learn</span>
+                <span class="tech-tag">FastAPI</span>
+                <span class="tech-tag">Docker</span>
+                <span class="tech-tag">Kubernetes</span>
+                <span class="tech-tag">GitLab CI/CD</span>
+                <span class="tech-tag">Nexus</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Vinci Eco Drive -->
+          <article class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="glass card-tilt timeline-card">
+              <div class="card-top">
+                <div>
+                  <span class="badge badge-copper" data-i18n="exp.vinci.type">Ingénierie Collaborative</span>
+                  <h3 data-i18n="exp.vinci.role">Membre équipe Systèmes Embarqués</h3>
+                  <p class="card-org">Vinci Eco Drive — Paris La Défense</p>
+                </div>
+                <span class="card-date mono" data-i18n="exp.vinci.date">Oct 2025 – Présent</span>
+              </div>
+              <ul class="card-list">
+                <li data-i18n="exp.vinci.b1">Rédaction de benchmarks techniques (VCU — Vehicle Control Unit) pour le véhicule prototype.</li>
+                <li data-i18n="exp.vinci.b2">Conception d'un PCB de volant sous <strong>KiCad</strong> dans un cadre d'ingénierie collaborative pluridisciplinaire.</li>
+              </ul>
+              <div class="tag-row">
+                <span class="tech-tag">KiCad</span>
+                <span class="tech-tag">PCB Design</span>
+                <span class="tech-tag">VCU</span>
+                <span class="tech-tag">Systèmes Embarqués</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Acadomia -->
+          <article class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="glass card-tilt timeline-card">
+              <div class="card-top">
+                <div>
+                  <span class="badge badge-glass" data-i18n="exp.acadomia.type">Enseignement</span>
+                  <h3 data-i18n="exp.acadomia.role">Professeur Particulier (Mathématiques &amp; Physique)</h3>
+                  <p class="card-org">Acadomia — Courbevoie</p>
+                </div>
+                <span class="card-date mono" data-i18n="exp.acadomia.date">Sep 2025 – Présent</span>
+              </div>
+              <ul class="card-list">
+                <li data-i18n="exp.acadomia.b1">Accompagnement pédagogique et vulgarisation de concepts scientifiques complexes auprès de 4 élèves de collège et lycée.</li>
+              </ul>
+              <div class="tag-row">
+                <span class="tech-tag">Mathématiques</span>
+                <span class="tech-tag">Physique</span>
+                <span class="tech-tag">Pédagogie</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PROJETS PUBLICS ==================== -->
+    <section id="projects" class="section">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag mono">03 // <span data-i18n="proj.tag">PROJETS</span></span>
+          <h2 class="section-title" data-i18n="proj.title">Projets Publics en IA, Deep Learning &amp; MLOps</h2>
+        </div>
+
+        <!-- Featured Interactive Projects (2-column row) -->
+        <div class="projects-grid">
+          <!-- Project 1: AnkiCardsGenerator (Linear 4-Agent 3D Pipeline) -->
+          <article class="glass card-tilt project-card reveal">
+            <div class="project-3d-wrap">
+              <canvas id="anki-3d" class="project-3d-canvas"></canvas>
+              <div class="pipeline-steps-hud mono" aria-hidden="true">
+                <span class="pstep active" data-step="0">1. OCR</span>
+                <span class="pstep-arr">→</span>
+                <span class="pstep" data-step="1" data-i18n="proj.anki.s2">2. Matière</span>
+                <span class="pstep-arr">→</span>
+                <span class="pstep" data-step="2" data-i18n="proj.anki.s3">3. Découpage</span>
+                <span class="pstep-arr">→</span>
+                <span class="pstep" data-step="3" data-i18n="proj.anki.s4">4. Anki</span>
+              </div>
+              <div class="project-3d-bar">
+                <span class="mono p3d-caption" data-i18n="proj.anki.hint3d">Pipeline linéaire 4 agents • Glisser / Relancer</span>
+                <button type="button" class="p3d-btn" id="ankiPulseBtn" data-i18n="proj.anki.btn3d">Exécuter</button>
+              </div>
+            </div>
+
+            <div class="project-body">
+              <div class="project-header">
+                <div class="project-icon glass-pill" aria-hidden="true">
+                  <!-- Notebook / Page & Pen SVG -->
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                    <path d="M15 5l3 3"/>
+                  </svg>
+                </div>
+                <span class="card-date mono" data-i18n="proj.anki.date">Oct 2025 – Présent</span>
+              </div>
+
+              <span class="badge badge-blue" data-i18n="proj.anki.cat">IA Agentique • Mistral AI</span>
+              <h3 class="project-title" data-i18n="proj.anki.title">Générateur de cartes Anki (AnkiCardsGenerator)</h3>
+              <p class="project-desc" data-i18n="proj.anki.desc">
+                Pipeline Python linéaire à <strong>4 agents IA</strong> (API Mistral AI) : <strong>1. OCR</strong> du PDF (texte &amp; schémas), <strong>2. Identification</strong> de la matière, <strong>3. Segmentation</strong> complète du cours en concepts clés, et <strong>4. Formatage</strong> en flashcards Anki LaTeX/HTML.
+              </p>
+
+              <div class="project-metrics">
+                <div class="p-metric">
+                  <span class="p-metric-val">4 Agents</span>
+                  <span class="p-metric-lbl" data-i18n="proj.anki.m1">Pipeline séquentiel</span>
+                </div>
+                <div class="p-metric">
+                  <span class="p-metric-val">PDF → Anki</span>
+                  <span class="p-metric-lbl" data-i18n="proj.anki.m2">LaTeX / HTML + Graphe</span>
+                </div>
+              </div>
+
+              <div class="tag-row">
+                <span class="tech-tag">Python</span>
+                <span class="tech-tag">Mistral OCR &amp; API</span>
+                <span class="tech-tag">Multi-Agents</span>
+                <span class="tech-tag">LaTeX</span>
+                <span class="tech-tag">HTML</span>
+              </div>
+
+              <div class="project-links">
+                <a href="https://github.com/Timothee19/AnkiCardsGenerator" target="_blank" rel="noopener noreferrer" class="link-arrow">
+                  <span data-i18n="proj.view_github">Voir le dépôt GitHub</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 2: SRGAN (2D Densifying Pixel Grid x1 -> x2 -> x4) -->
+          <article class="glass card-tilt project-card reveal">
+            <div class="project-3d-wrap srgan-wrap">
+              <canvas id="srgan-2d" class="project-2d-canvas"></canvas>
+              <div class="project-3d-bar">
+                <span class="mono p3d-caption" id="srganResInfo">16×16 → ×4 (64×64 px)</span>
+                <div class="res-switcher" role="group" aria-label="Facteur de super-résolution">
+                  <button type="button" class="p3d-btn res-btn" data-scale="1">×1</button>
+                  <button type="button" class="p3d-btn res-btn" data-scale="2">×2</button>
+                  <button type="button" class="p3d-btn res-btn active" data-scale="4">×4</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-body">
+              <div class="project-header">
+                <div class="project-icon glass-pill" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <span class="card-date mono" data-i18n="proj.srgan.date">Mai 2024 – Août 2025</span>
+              </div>
+
+              <span class="badge badge-copper" data-i18n="proj.srgan.cat">Deep Learning • Computer Vision</span>
+              <h3 class="project-title" data-i18n="proj.srgan.title">Super Résolution d'images par SRGAN</h3>
+              <p class="project-desc" data-i18n="proj.srgan.desc">
+                Conception from scratch et entraînement d'un <strong>Wasserstein SRGAN</strong> (TensorFlow / Keras, <strong>12,7M paramètres</strong>) pour la super-résolution <strong>×2 et ×4</strong> (comparaison conditionnel vs non-conditionnel) sur 1 254 images.
+              </p>
+
+              <div class="project-metrics">
+                <div class="p-metric">
+                  <span class="p-metric-val">28.74 dB</span>
+                  <span class="p-metric-lbl">PSNR</span>
+                </div>
+                <div class="p-metric">
+                  <span class="p-metric-val">0.8667</span>
+                  <span class="p-metric-lbl">SSIM</span>
+                </div>
+                <div class="p-metric">
+                  <span class="p-metric-val">12.7M</span>
+                  <span class="p-metric-lbl" data-i18n="proj.srgan.m3">Paramètres</span>
+                </div>
+              </div>
+
+              <div class="tag-row">
+                <span class="tech-tag">TensorFlow</span>
+                <span class="tech-tag">Keras</span>
+                <span class="tech-tag">Wasserstein GAN</span>
+                <span class="tech-tag">Super-Resolution ×4</span>
+              </div>
+
+              <div class="project-links">
+                <a href="https://github.com/Timothee19/SRGAN" target="_blank" rel="noopener noreferrer" class="link-arrow">
+                  <span data-i18n="proj.view_github">Voir le dépôt GitHub</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Other Public Repositories Grid (3-column row) -->
+        <div class="other-projects-grid">
+          <!-- Project 3: Alzheimer MRI OASIS-1 -->
+          <article class="glass card-tilt compact-project-card reveal">
+            <div class="project-header">
+              <div class="project-icon glass-pill" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+              </div>
+              <span class="badge badge-blue" data-i18n="proj.alz.cat">Imagerie Médicale</span>
+            </div>
+            <h3 class="compact-title" data-i18n="proj.alz.title">Détection d'Alzheimer par IRM (OASIS-1)</h3>
+            <p class="project-desc" data-i18n="proj.alz.desc">
+              EDA rigoureuse (split par patient anti-data-leakage) et modélisation Deep Learning (<strong>CNN 2D, Attention MIL 61 coupes, MobileNetV2 2.5D</strong>) sur <strong>86 437 coupes</strong> et 347 patients.
+            </p>
+            <div class="tag-row">
+              <span class="tech-tag">TensorFlow</span>
+              <span class="tech-tag">Attention MIL</span>
+              <span class="tech-tag">MobileNetV2</span>
+              <span class="tech-tag">Intel XPU</span>
+            </div>
+            <div class="project-links">
+              <a href="https://github.com/Timothee19/alzheimer-mri-oasis1" target="_blank" rel="noopener noreferrer" class="link-arrow">
+                <span>alzheimer-mri-oasis1</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Project 4: Bob-slay (Probabl x IBM x ESILV Hackathon) -->
+          <article class="glass card-tilt compact-project-card reveal">
+            <div class="project-header">
+              <div class="project-icon glass-pill" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <span class="badge badge-copper" data-i18n="proj.bob.cat">Data Science • Santé</span>
+            </div>
+            <h3 class="compact-title" data-i18n="proj.bob.title">Parkinson MDS-UPDRS (Bobathon)</h3>
+            <p class="project-desc" data-i18n="proj.bob.desc">
+              Challenge <strong>Probabl × IBM × ESILV</strong> : prédiction et correction du biais d'évaluation du score moteur OFF MDS-UPDRS pour la maladie de Parkinson, suivi via <strong>Skore Hub</strong>.
+            </p>
+            <div class="tag-row">
+              <span class="tech-tag">Scikit-learn</span>
+              <span class="tech-tag">Skore</span>
+              <span class="tech-tag">EDA</span>
+              <span class="tech-tag">Kaggle</span>
+            </div>
+            <div class="project-links">
+              <a href="https://github.com/Timothee19/Bob-slay" target="_blank" rel="noopener noreferrer" class="link-arrow">
+                <span>Bob-slay</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Project 5: Projet_Churn_Detection (GitLab) -->
+          <article class="glass card-tilt compact-project-card reveal">
+            <div class="project-header">
+              <div class="project-icon glass-pill" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              </div>
+              <span class="badge badge-glass">MLOps • GitLab</span>
+            </div>
+            <h3 class="compact-title" data-i18n="proj.churn.title">Détection de Churn (MLOps)</h3>
+            <p class="project-desc" data-i18n="proj.churn.desc">
+              Dépôt GitLab dédié à la prédiction de churn client : entraînement de modèles supervisés, service d'inférence et pratiques d'industrialisation MLOps / CI/CD.
+            </p>
+            <div class="tag-row">
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">Machine Learning</span>
+              <span class="tech-tag">GitLab CI/CD</span>
+              <span class="tech-tag">MLOps</span>
+            </div>
+            <div class="project-links">
+              <a href="https://gitlab.com/Timothee19/Projet_Churn_Detection" target="_blank" rel="noopener noreferrer" class="link-arrow">
+                <span>Projet_Churn_Detection</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== COMPÉTENCES ==================== -->
+    <section id="skills" class="section">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag mono">04 // <span data-i18n="skills.tag">COMPÉTENCES</span></span>
+          <h2 class="section-title" data-i18n="skills.title">Stack Technique &amp; Savoir-faire</h2>
+        </div>
+
         <div class="skills-grid">
-          <div class="skill-card">
-            <h3>IA &amp; Deep Learning</h3>
-            <p>Architectures neuronales, vision par ordinateur et systèmes multi-agents.</p>
-            <ul class="tag-list">
-              <li>TensorFlow / Keras</li>
-              <li>CNN &amp; Attention MIL</li>
-              <li>GAN / WGAN</li>
-              <li>Mistral API / LLMs</li>
-              <li>Knowledge Graphs</li>
-            </ul>
+          <div class="glass card-tilt skill-group reveal">
+            <div class="skill-group-head">
+              <span class="skill-dot dot-blue"></span>
+              <h3 data-i18n="skills.ai">Data Science &amp; IA</h3>
+            </div>
+            <div class="skill-pills">
+              <span class="skill-pill">Machine Learning</span>
+              <span class="skill-pill">Deep Learning</span>
+              <span class="skill-pill">LLMs</span>
+              <span class="skill-pill" data-i18n="skills.agentic">Systèmes Agentiques</span>
+              <span class="skill-pill">API Mistral AI</span>
+              <span class="skill-pill">Scikit-learn</span>
+              <span class="skill-pill">TensorFlow</span>
+              <span class="skill-pill">Keras</span>
+            </div>
           </div>
-          <div class="skill-card">
-            <h3>Data Science &amp; ML</h3>
-            <p>Analyse exploratoire, modélisation tabulaire, calibration et explicabilité.</p>
-            <ul class="tag-list">
-              <li>Python</li>
-              <li>Jupyter Notebook</li>
-              <li>Scikit-learn</li>
-              <li>SHAP (XAI)</li>
-              <li>SQLite</li>
-            </ul>
+
+          <div class="glass card-tilt skill-group reveal">
+            <div class="skill-group-head">
+              <span class="skill-dot dot-copper"></span>
+              <h3 data-i18n="skills.dev">Développement</h3>
+            </div>
+            <div class="skill-pills">
+              <span class="skill-pill">Python</span>
+              <span class="skill-pill">FastAPI</span>
+              <span class="skill-pill">REST API</span>
+              <span class="skill-pill">SQL</span>
+              <span class="skill-pill">LaTeX</span>
+              <span class="skill-pill">KiCad</span>
+            </div>
           </div>
-          <div class="skill-card">
-            <h3>Développement &amp; Web</h3>
-            <p>Interfaces web modernes, outillage scientifique et rédaction technique.</p>
-            <ul class="tag-list">
-              <li>TypeScript</li>
-              <li>HTML5 / CSS3</li>
-              <li>Git / GitHub</li>
-              <li>Linux</li>
-              <li>LaTeX</li>
-            </ul>
-          </div>
-          <div class="skill-card">
-            <h3>Embarqué &amp; Hardware</h3>
-            <p>Conception électronique et firmware pour véhicules électriques.</p>
-            <ul class="tag-list">
-              <li>C / C++</li>
-              <li>ESP32</li>
-              <li>PlatformIO</li>
-              <li>KiCad (PCB)</li>
-              <li>Instrumentation</li>
-            </ul>
+
+          <div class="glass card-tilt skill-group reveal">
+            <div class="skill-group-head">
+              <span class="skill-dot dot-ice"></span>
+              <h3 data-i18n="skills.mlops">MLOps &amp; DevOps</h3>
+            </div>
+            <div class="skill-pills">
+              <span class="skill-pill">Docker</span>
+              <span class="skill-pill">Kubernetes (Minikube)</span>
+              <span class="skill-pill">GitLab CI/CD</span>
+              <span class="skill-pill">Pytest</span>
+              <span class="skill-pill">Git</span>
+              <span class="skill-pill">Nexus Registry</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Experience / Background -->
-    <section id="parcours" class="section">
+    <!-- ==================== FORMATIONS ==================== -->
+    <section id="education" class="section">
       <div class="container">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Parcours &amp; Engagement</p>
-            <h2>Formation &amp; Association</h2>
-          </div>
+        <div class="section-header reveal">
+          <span class="section-tag mono">05 // <span data-i18n="edu.tag">FORMATIONS</span></span>
+          <h2 class="section-title" data-i18n="edu.title">Parcours Académique</h2>
         </div>
-        <div class="timeline-grid">
-          <article class="timeline-card">
-            <span class="timeline-badge">Formation</span>
-            <h3>ESILV — Majeure Data &amp; Intelligence Artificielle</h3>
-            <p>
-              École Supérieure d'Ingénieurs Léonard de Vinci (Paris La Défense). Spécialisation en Machine Learning, Deep Learning, IA générative et ingénierie des données.
+
+        <div class="edu-grid">
+          <article class="glass card-tilt edu-card reveal">
+            <span class="card-date mono" data-i18n="edu.esilv.date">Sep 2025 – Août 2028</span>
+            <h3>ESILV — <span data-i18n="edu.esilv.degree">Cycle Ingénieur Bac+5</span></h3>
+            <p class="card-org" data-i18n="edu.esilv.major">Majeure Data &amp; IA (English Track) • Paris La Défense</p>
+            <p class="edu-details" data-i18n="edu.esilv.desc">
+              Machine Learning, Deep Learning, MLOps, Cybersecurity, Mineure <strong>Quantum Computing</strong>, Mathematics. Délégué de groupe de TD et membre de la commission de vie étudiante.
             </p>
           </article>
-          <article class="timeline-card">
-            <span class="timeline-badge">Association</span>
-            <h3>Vinci Eco Drive — Pôle Systèmes Embarqués</h3>
-            <p>
-              Membre contributeur de l'association de conception de véhicules électriques à haute efficacité énergétique (Shell Eco-marathon &amp; Formula Student) : capteurs ESP32 en C++ et conception de PCB sous KiCad.
+
+          <article class="glass card-tilt edu-card reveal">
+            <span class="card-date mono" data-i18n="edu.hanyang.date">Mars 2026 – Juin 2026</span>
+            <h3>Hanyang University</h3>
+            <p class="card-org" data-i18n="edu.hanyang.major">Academic Exchange Semester • Séoul, Corée du Sud</p>
+            <p class="edu-details" data-i18n="edu.hanyang.desc">
+              Signal Processing, Artificial Intelligence, Engineering Mathematics. Immersion académique internationale en anglais.
             </p>
           </article>
-          <article class="timeline-card">
-            <span class="timeline-badge">Recherche &amp; Concours</span>
-            <h3>Hackathons IA &amp; TIPE</h3>
-            <p>
-              Participation au Bobathon ESILV (Probabl × IBM) sur la maladie de Parkinson et développement d'un Wasserstein SRGAN en classes préparatoires scientifiques.
+
+          <article class="glass card-tilt edu-card reveal">
+            <span class="card-date mono" data-i18n="edu.cpge.date">Sep 2023 – Juin 2025</span>
+            <h3>Lycée Claude Bernard</h3>
+            <p class="card-org" data-i18n="edu.cpge.major">CPGE Scientifique MPSI / MP (Option Informatique) • Paris</p>
+            <p class="edu-details" data-i18n="edu.cpge.desc">
+              Reçu au concours <strong>CCINP avec 516 points</strong>. Délégué et représentant élu des classes préparatoires au conseil d'administration.
             </p>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CONTACT ==================== -->
+    <section id="contact" class="section">
+      <div class="container">
+        <div class="glass contact-card reveal">
+          <div class="contact-glow"></div>
+          <span class="section-tag mono">06 // CONTACT</span>
+          <h2 class="section-title" data-i18n="contact.title">Discutons de votre prochain projet IA</h2>
+          <p class="contact-desc" data-i18n="contact.desc">
+            Je recherche un <strong>stage de 5 mois (12 avril – 7 septembre 2027)</strong> en Recherche IA, Machine Learning, Data Science ou MLOps. N'hésitez pas à me contacter !
+          </p>
+
+          <div class="contact-actions">
+            <button type="button" class="btn btn-primary btn-glow" id="copyEmailBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>tim.barselo@gmail.com</span>
+            </button>
+            <a href="assets/CV_Timothee_Soulez_Barselo.pdf" download class="btn btn-glass">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span data-i18n="hero.cta_cv">Télécharger mon CV</span>
+            </a>
+          </div>
+
+          <div class="contact-links">
+            <a href="https://www.linkedin.com/in/timoth%C3%A9e-soulez-barselo-a777b7279" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+            <a href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+            <a href="https://gitlab.com/Timothee19" target="_blank" rel="noopener noreferrer">GitLab ↗</a>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
+  <footer class="footer">
     <div class="container footer-inner">
-      <div>
-        <p class="footer-title">Timothée Barselo <span class="mono-label">@Timothee19</span></p>
-        <p class="footer-copy">Portfolio hébergé sur GitHub Pages · Optimisé pour la performance et le référencement.</p>
-      </div>
-      <div class="footer-links">
-        <a href="https://github.com/Timothee19" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://github.com/Timothee19?tab=repositories" target="_blank" rel="noopener noreferrer">Dépôts</a>
-        <a href="#top">Haut de page ↑</a>
-      </div>
+      <p>© <span id="year">2026</span> Timothée Soulez Barselo — <span data-i18n="footer.rights">Conçu avec soin &amp; WebGL 3D.</span></p>
+      <a href="#hero" class="back-top mono" data-i18n="footer.top">↑ Haut de page</a>
     </div>
   </footer>
 
-  <script src="script.js" defer></script>
+  <!-- Toast notification -->
+  <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Three.js (r128 UMD for universal compatibility on GitHub Pages & local preview) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="main.js" defer></script>
 </body>
 </html>
