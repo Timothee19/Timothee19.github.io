@@ -496,7 +496,7 @@
     root.add(s0);
     stageGroups.push(s0);
 
-    // --- Stage 1: Subject Identification (Classifier Core + Orbiting Tag Ring) ---
+    // --- Stage 1: Subject Identification (Classifier Core + Tilted 3D Orbital Ring) ---
     const s1 = new THREE.Group();
     const idCore = new THREE.Mesh(
       new THREE.IcosahedronGeometry(0.34, 0),
@@ -504,10 +504,10 @@
     );
     s1.add(idCore);
     const idRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.52, 0.018, 10, 48),
-      new THREE.MeshBasicMaterial({ color: COPPER_SOFT, transparent: true, opacity: 0.75 })
+      new THREE.TorusGeometry(0.48, 0.015, 10, 48),
+      new THREE.MeshStandardMaterial({ color: COPPER_SOFT, metalness: 0.5, roughness: 0.3, transparent: true, opacity: 0.65 })
     );
-    idRing.rotation.x = Math.PI * 0.38;
+    idRing.rotation.set(Math.PI * 0.22, Math.PI * 0.28, Math.PI * 0.18);
     s1.add(idRing);
     s1.position.set(xs[1], 0, 0);
     root.add(s1);
@@ -564,26 +564,26 @@
     root.add(s3);
     stageGroups.push(s3);
 
-    // --- Directional Pipeline Conduits between stages ---
+    // --- Directional Pipeline Conduits penetrating cleanly into each 3D agent ---
     for (let i = 0; i < 3; i++) {
-      const startX = xs[i] + 0.46;
-      const endX = xs[i + 1] - 0.46;
+      const startX = xs[i];
+      const endX = xs[i + 1];
       const midX = (startX + endX) / 2;
       const tube = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.018, 0.018, endX - startX, 8),
-        new THREE.MeshBasicMaterial({ color: CBLUE_LIGHT, transparent: true, opacity: 0.45 })
+        new THREE.CylinderGeometry(0.018, 0.018, endX - startX, 10),
+        new THREE.MeshStandardMaterial({ color: CBLUE_LIGHT, metalness: 0.35, roughness: 0.4, transparent: true, opacity: 0.55 })
       );
       tube.rotation.z = Math.PI / 2;
       tube.position.set(midX, 0, 0);
       root.add(tube);
 
-      // Small arrow cone pointing right
+      // Directional arrow cone centered between stages
       const cone = new THREE.Mesh(
-        new THREE.ConeGeometry(0.065, 0.14, 10),
-        new THREE.MeshBasicMaterial({ color: COPPER_SOFT })
+        new THREE.ConeGeometry(0.068, 0.15, 12),
+        new THREE.MeshStandardMaterial({ color: COPPER_SOFT, metalness: 0.4, roughness: 0.35 })
       );
       cone.rotation.z = -Math.PI / 2;
-      cone.position.set(endX - 0.02, 0, 0);
+      cone.position.set(midX + 0.04, 0, 0);
       root.add(cone);
     }
 
@@ -636,7 +636,8 @@
       // Stage-specific animations
       scanLaser.position.y = Math.sin(t * 2.8) * 0.36;
       idCore.rotation.y = t * 1.1;
-      idRing.rotation.z = t * 1.6;
+      idRing.rotation.y = Math.PI * 0.28 + t * 0.9;
+      idRing.rotation.x = Math.PI * 0.22 + Math.sin(t * 0.7) * 0.25;
       s2.rotation.y = Math.sin(t * 0.9) * 0.35;
       topCard.position.y = 0.22 + Math.sin(t * 2.2) * 0.08 + (activeStage === 3 ? 0.10 : 0);
       topCard.rotation.z = activeStage === 3 ? Math.sin(t * 4) * 0.14 : 0.04;
