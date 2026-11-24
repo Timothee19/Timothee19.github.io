@@ -17,36 +17,152 @@ window.TSB3D = (() => {
 
   function attachOrbit(canvas, state, onClick) {
     let dragging = false, moved = 0, lx = 0, ly = 0;
-    canvas.addEventListener('pointerdown', (e) => {
-      dragging = true; moved = 0; lx = e.clientX; ly = e.clientY;
-      try { canvas.setPointerCapture(e.pointerId); } catch {}
-    });
-    canvas.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const dx = e.clientX - lx, dy = e.clientY - ly;
-      moved += Math.abs(dx) + Math.abs(dy);
-      state.vy = dx * 0.0085;
-      state.vx = dy * 0.0065;
-      state.ry += state.vy;
-      state.rx = Math.max(-1.1, Math.min(1.1, state.rx + state.vx));
-      lx = e.clientX; ly = e.clientY;
-    });
-    const stop = (e) => {
-      if (dragging && moved < 6 && typeof onClick === 'function') onClick(e);
-      dragging = false;
-    };
-    canvas.addEventListener('pointerup', stop);
-    canvas.addEventListener('pointercancel', () => { dragging = false; });
-    canvas._tsbDrag = (dx, dy) => {
-      state.vy = dx * 0.009;
-      state.vx = dy * 0.007;
-      state.ry += state.vy;
-      state.rx = Math.max(-1.1, Math.min(1.1, state.rx + state.vx));
-    };
-    canvas._tsbClick = (normEvent) => {
-      if (typeof onClick === 'function') onClick(normEvent);
-    };
+    if (canvas && typeof canvas.addEventListener === 'function') {
+      canvas.addEventListener('pointerdown', (e) => {
+        dragging = true; moved = 0; lx = e.clientX; ly = e.clientY;
+        try { canvas.setPointerCapture(e.pointerId); } catch {}
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lx, dy = e.clientY - ly;
+        moved += Math.abs(dx) + Math.abs(dy);
+        state.vy = dx * 0.0085;
+        state.vx = dy * 0.0065;
+        state.ry += state.vy;
+        state.rx = Math.max(-1.1, Math.min(1.1, state.rx + state.vx));
+        lx = e.clientX; ly = e.clientY;
+      });
+      const stop = (e) => {
+        if (dragging && moved < 6 && typeof onClick === 'function') onClick(e);
+        dragging = false;
+      };
+      canvas.addEventListener('pointerup', stop);
+      canvas.addEventListener('pointercancel', () => { dragging = false; });
+    }
+    if (canvas) {
+      canvas._tsbDrag = (dx, dy) => {
+        state.vy = dx * 0.009;
+        state.vx = dy * 0.007;
+        state.ry += state.vy;
+        state.rx = Math.max(-1.1, Math.min(1.1, state.rx + state.vx));
+      };
+      canvas._tsbClick = (normEvent) => {
+        if (typeof onClick === 'function') onClick(normEvent);
+      };
+    }
     return () => dragging;
+  }
+
+  let _savedClearCol = null;
+  function renderDemoToRT(sharedRenderer, rt, demoScene, demoCamera, clearColorHex, clearAlpha, needsShadow) {
+    if (!_savedClearCol) _savedClearCol = new THREE.Color();
+    const prevRT = sharedRenderer.getRenderTarget();
+    const prevAutoClear = sharedRenderer.autoClear;
+    const prevToneMapping = sharedRenderer.toneMapping;
+    sharedRenderer.getClearColor(_savedClearCol);
+    const prevClearAlpha = sharedRenderer.getClearAlpha();
+
+    sharedRenderer.setRenderTarget(rt);
+    sharedRenderer.setClearColor(clearColorHex, clearAlpha);
+    sharedRenderer.autoClear = true;
+    sharedRenderer.toneMapping = THREE.NoToneMapping;
+    if (needsShadow) sharedRenderer.shadowMap.needsUpdate = true;
+    sharedRenderer.render(demoScene, demoCamera);
+
+    sharedRenderer.setRenderTarget(prevRT);
+    sharedRenderer.setClearColor(_savedClearCol, prevClearAlpha);
+    sharedRenderer.autoClear = prevAutoClear;
+    sharedRenderer.toneMapping = prevToneMapping;
+  }
+
+  let _brainDataCache = null;
+  function getBrainPointCloudData() {
+    if (_brainDataCache) return _brainDataCache;
+    const ptsList = [];
+    const baseColors = [];
+    const isHippo = [];
+
+    const cCortex = new THREE.Color(0xcfc7ba);
+    const cDeep = new THREE.Color(0x6d675f);
+    const cAmber = new THREE.Color(0xd99b58);
+
+    function sampleHemisphere(side, count) {
+      const tmp = new THREE.Color();
+      for (let i = 0; i < count; i++) {
+        const phi = Math.acos(1 - 2 * ((i + 0.5) / count));
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+        let x = Math.sin(phi) * Math.cos(theta);
+        let y = Math.cos(phi);
+        let z = Math.sin(phi) * Math.sin(theta);
+
+        if (x * side < 0) x *= 0.14;
+        x *= 0.92; y *= 0.98; z *= 1.48;
+        const tempBulge = Math.exp(-Math.pow((y + 0.28) * 2.4, 2) - Math.pow((z - 0.12) * 1.5, 2)) * 0.22;
+        x += side * tempBulge * (x * side > 0 ? 1 : 0);
+        if (z > 0) x *= 1.0 - z * 0.14;
+        if (y < -0.35) y += 0.16 * Math.exp(-z * z * 0.9);
+
+        const g = ridgeFBM(x * 2.5 + side * 0.35, y * 2.5, z * 2.5);
+        const fold = (g - 0.42) * 0.165;
+        const len = Math.hypot(x, y, z) || 1;
+        x += (x / len) * fold + side * 0.11;
+        y += (y / len) * fold + 0.14;
+        z += (z / len) * fold;
+
+        ptsList.push(x, y, z);
+        tmp.copy(cDeep).lerp(cCortex, Math.max(0, Math.min(1, g * 1.2)));
+        baseColors.push(tmp.r, tmp.g, tmp.b);
+        isHippo.push(0);
+      }
+    }
+
+    sampleHemisphere(-1, 2400);
+    sampleHemisphere(1, 2400);
+
+    for (let i = 0; i < 750; i++) {
+      const phi = Math.acos(1 - 2 * ((i + 0.5) / 750));
+      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+      const x = Math.sin(phi) * Math.cos(theta) * 0.68;
+      const y = Math.cos(phi) * 0.38 - 0.56;
+      const z = Math.sin(phi) * Math.sin(theta) * 0.46 - 0.82;
+      ptsList.push(x, y + Math.sin(y * 34) * 0.02, z);
+      baseColors.push(0.62, 0.58, 0.54);
+      isHippo.push(0);
+    }
+
+    for (let i = 0; i < 240; i++) {
+      const a = (i / 240) * Math.PI * 24;
+      const u = i / 240;
+      const r = 0.13 + (1 - u) * 0.05;
+      ptsList.push(Math.cos(a) * r, -1.24 + u * 0.86, Math.sin(a) * r - 0.32 + u * 0.12);
+      baseColors.push(0.55, 0.52, 0.49);
+      isHippo.push(0);
+    }
+
+    [-1, 1].forEach((side) => {
+      for (let i = 0; i < 220; i++) {
+        const u = (i / 220) * Math.PI * 1.15;
+        const jitter = 0.045;
+        const x = side * (0.34 + Math.cos(u) * 0.14) + (Math.random() - 0.5) * jitter;
+        const y = -0.04 + Math.sin(u) * 0.18 + (Math.random() - 0.5) * jitter;
+        const z = -0.08 + (u / Math.PI - 0.5) * 0.42 + (Math.random() - 0.5) * jitter;
+        ptsList.push(x, y, z);
+        baseColors.push(cAmber.r, cAmber.g, cAmber.b);
+        isHippo.push(1);
+      }
+    });
+
+    const totalPts = ptsList.length / 3;
+    const basePosArr = new Float32Array(ptsList);
+    const baseColArr = new Float32Array(baseColors);
+    const isHippoArr = new Float32Array(isHippo);
+    const phases = new Float32Array(totalPts);
+    for (let i = 0; i < totalPts; i++) {
+      phases[i] = basePosArr[i * 3] * 2.7 + basePosArr[i * 3 + 1] * 3.1 + basePosArr[i * 3 + 2] * 2.3;
+    }
+
+    _brainDataCache = { basePosArr, baseColArr, isHippoArr, phases };
+    return _brainDataCache;
   }
 
   function hash3(x, y, z) {
@@ -79,21 +195,25 @@ window.TSB3D = (() => {
     return sum;
   }
 
-  /* Clean subtle fine paper/cloth micro-grain bump texture */
+  /* Clean subtle fine paper/cloth micro-grain bump texture (cached source canvas) */
+  let _linenBumpCanvas = null;
   function makeLinenBumpTexture() {
-    const c = document.createElement('canvas');
-    c.width = 256; c.height = 256;
-    const g = c.getContext('2d');
-    g.fillStyle = '#808080';
-    g.fillRect(0, 0, 256, 256);
-    for (let y = 0; y < 256; y += 2) {
-      for (let x = 0; x < 256; x += 2) {
-        const v = 122 + ((x + y) % 4 === 0 ? 10 : 0) + Math.floor(Math.random() * 10);
-        g.fillStyle = `rgb(${v},${v},${v})`;
-        g.fillRect(x, y, 2, 2);
+    if (!_linenBumpCanvas) {
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 256;
+      const g = c.getContext('2d');
+      g.fillStyle = '#808080';
+      g.fillRect(0, 0, 256, 256);
+      for (let y = 0; y < 256; y += 2) {
+        for (let x = 0; x < 256; x += 2) {
+          const v = 122 + ((x + y) % 4 === 0 ? 10 : 0) + Math.floor(Math.random() * 10);
+          g.fillStyle = `rgb(${v},${v},${v})`;
+          g.fillRect(x, y, 2, 2);
+        }
       }
+      _linenBumpCanvas = c;
     }
-    const tex = new THREE.CanvasTexture(c);
+    const tex = new THREE.CanvasTexture(_linenBumpCanvas);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(3, 4);
     return tex;
@@ -105,7 +225,7 @@ window.TSB3D = (() => {
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
     const uniforms = {
@@ -251,10 +371,27 @@ window.TSB3D = (() => {
     camera.position.copy(HOME_POS);
     camera.lookAt(HOME_LOOK);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    function updateHomeCamera() {
+      const aspect = Math.max(0.5, camera.aspect);
+      if (aspect >= 1.35) {
+        HOME_POS.set(-0.06, 2.55, 8.15);
+        HOME_LOOK.set(-0.02, -0.06, 0.0);
+      } else {
+        const fovRad = THREE.MathUtils.degToRad(camera.fov);
+        const neededW = 6.7;
+        const z = Math.min(15.2, Math.max(8.15, (neededW / (2 * Math.tan(fovRad * 0.5) * aspect)) + 0.55));
+        const t = Math.min(1, (z - 8.15) / 6.0);
+        HOME_POS.set(-0.08, 2.55 + t * 1.45, z);
+        HOME_LOOK.set(-0.06, -0.06 - t * 0.12, 0.0);
+      }
+    }
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) {
@@ -267,9 +404,16 @@ window.TSB3D = (() => {
       vpH = canvas.clientHeight || 560;
       camera.aspect = vpW / vpH;
       camera.updateProjectionMatrix();
+      updateHomeCamera();
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
       renderer.setSize(vpW, vpH, false);
+      if (camMode === 'desk') {
+        camera.position.copy(HOME_POS);
+        curLook.copy(HOME_LOOK);
+        camera.lookAt(curLook);
+      }
+      if (realScreenMesh) computeLaptopZoomTarget();
     }
-    resize();
     window.addEventListener('resize', resize);
 
     /* ---------- APPLE STUDIO IBL ENVIRONMENT (PMREM Softboxes) ---------- */
@@ -302,9 +446,10 @@ window.TSB3D = (() => {
       return tex;
     }
 
-    const envDark = buildStudioEnv(false);
-    const envLight = buildStudioEnv(true);
-    scene.environment = envDark;
+    let envDark = null;
+    let envLight = null;
+    let deskTexDark = null;
+    let deskTexLight = null;
 
     const ambLight = new THREE.AmbientLight(0xfff5e8, 0.30);
     scene.add(ambLight);
@@ -354,7 +499,7 @@ window.TSB3D = (() => {
     }
 
     const deskMat = new THREE.MeshStandardMaterial({
-      map: makeDeskTexture(false),
+      map: null,
       bumpMap: linenBump,
       bumpScale: 0.008,
       roughness: 0.58,
@@ -547,27 +692,222 @@ window.TSB3D = (() => {
       };
     });
 
-    /* ---------- NATIVE IN-MESH MACBOOK PRO SCREEN OS (1600x1000 RENDERED DIRECTLY ONTO 3D SCREEN MESH!) ---------- */
+    /* ---------- NATIVE IN-MESH MACBOOK PRO SCREEN OS (100% GPU COMPOSITED — ZERO READPIXELS, ZERO 60FPS CANVAS UPLOAD!) ---------- */
     const SCR_W = 1600, SCR_H = 1000;
-    const screenCanvas = document.createElement('canvas');
-    screenCanvas.width = SCR_W; screenCanvas.height = SCR_H;
-    const sCtx = screenCanvas.getContext('2d');
+    const STAGE_RECT = { x: 24, y: 88, w: 980, h: 796 };
 
-    // Offscreen composition buffer so the vintage B&W CRT TV filter & clip-path operate cleanly
+    // Static OS chrome + HUD chips (with transparent STAGE_RECT window) — ONLY redrawn & uploaded on UI state change!
     const uiCanvas = document.createElement('canvas');
     uiCanvas.width = SCR_W; uiCanvas.height = SCR_H;
     const uCtx = uiCanvas.getContext('2d');
 
-    const screenTex = new THREE.CanvasTexture(screenCanvas);
-    if (THREE.SRGBColorSpace) screenTex.colorSpace = THREE.SRGBColorSpace;
-    screenTex.minFilter = THREE.LinearFilter;
-    screenTex.magFilter = THREE.LinearFilter;
-    screenTex.generateMipmaps = false;
-    screenTex.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
+    const uiTex = new THREE.CanvasTexture(uiCanvas);
+    if (THREE.SRGBColorSpace) uiTex.colorSpace = THREE.SRGBColorSpace;
+    uiTex.minFilter = THREE.LinearFilter;
+    uiTex.magFilter = THREE.LinearFilter;
+    uiTex.generateMipmaps = false;
 
-    // Live offscreen demo canvas (980x740) rendered into the left stage of the 3D MacBook screen!
-    const STAGE_RECT = { x: 24, y: 88, w: 980, h: 796 };
-    let demoCanvas = null;
+    const isWebGL2 = renderer.capabilities.isWebGL2;
+    const demoRT = new THREE.WebGLRenderTarget(STAGE_RECT.w, STAGE_RECT.h, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      type: isWebGL2 ? THREE.HalfFloatType : THREE.UnsignedByteType,
+      samples: isWebGL2 ? 4 : 0
+    });
+    const screenRT = new THREE.WebGLRenderTarget(SCR_W, SCR_H, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      type: isWebGL2 ? THREE.HalfFloatType : THREE.UnsignedByteType
+    });
+
+    // Dedicated 2D canvas + texture ONLY for SRGAN 2D pixel comparator (updates only on drag/click!)
+    const srganCanvas = document.createElement('canvas');
+    srganCanvas.width = STAGE_RECT.w; srganCanvas.height = STAGE_RECT.h;
+    const srganTex = new THREE.CanvasTexture(srganCanvas);
+    if (THREE.SRGBColorSpace) srganTex.colorSpace = THREE.SRGBColorSpace;
+    srganTex.minFilter = THREE.LinearFilter;
+    srganTex.magFilter = THREE.LinearFilter;
+    srganTex.generateMipmaps = false;
+
+    const screenVertShader = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+    const crtQuadVertShader = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+      }
+    `;
+    const screenFragShader = `
+      precision highp float;
+      uniform sampler2D uUiTex;
+      uniform sampler2D uDemoTex;
+      uniform vec4 uStageRect;
+      uniform vec3 uBg2;
+      uniform float uDemoIsLinear;
+      uniform float uDemoToneMap;
+      uniform float uCrt;
+      uniform float uOutputLinear;
+      varying vec2 vUv;
+
+      vec3 linearToSRGB(vec3 c) {
+        vec3 cl = max(c, vec3(0.0));
+        vec3 lo = cl * 12.92;
+        vec3 hi = 1.055 * pow(cl, vec3(1.0 / 2.4)) - 0.055;
+        return mix(lo, hi, step(vec3(0.0031308), cl));
+      }
+      vec3 srgbToLinear(vec3 c) {
+        vec3 cl = clamp(c, 0.0, 1.0);
+        vec3 lo = cl / 12.92;
+        vec3 hi = pow((cl + 0.055) / 1.055, vec3(2.4));
+        return mix(lo, hi, step(vec3(0.04045), cl));
+      }
+      vec3 acesToneMap(vec3 x) {
+        x *= 1.08 / 0.6;
+        const float a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
+        return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+      }
+
+      void main() {
+        vec2 topUv = vec2(vUv.x, 1.0 - vUv.y);
+        vec3 finalCol = vec3(0.0196, 0.0235, 0.0314);
+
+        if (uCrt > 0.002) {
+          if (uCrt < 0.28) {
+            float u = uCrt / 0.28;
+            float easeW = 1.0 - pow(1.0 - u, 3.0);
+            float halfW = max(0.004, 0.5 * easeW);
+            float dx = max(0.0, abs(topUv.x - 0.5) - halfW);
+            float dy = abs(topUv.y - 0.5);
+            float core = step(dx, 0.0005) * smoothstep(0.0042, 0.002, dy);
+            float glow = exp(-dy * 55.0) * exp(-dx * 42.0) * 0.72;
+            float a = clamp(u * 3.2, 0.0, 1.0);
+            finalCol = mix(finalCol, vec3(1.0), clamp((core + glow) * a, 0.0, 1.0));
+          } else {
+            // uUiTex & srganTex use SRGBColorSpace (SRGB8_ALPHA8, avoids Linux/Firefox BGRA swap) -> hardware-decoded to Linear
+            vec4 ui = texture2D(uUiTex, vUv);
+            vec3 uiSRGB = linearToSRGB(ui.rgb);
+            vec3 osCol = uiSRGB;
+
+            vec2 sUv = (topUv - uStageRect.xy) / uStageRect.zw;
+            if (sUv.x >= 0.0 && sUv.x <= 1.0 && sUv.y >= 0.0 && sUv.y <= 1.0) {
+              vec4 demo = texture2D(uDemoTex, vec2(sUv.x, 1.0 - sUv.y));
+              vec3 stageCol;
+              if (uDemoIsLinear > 0.5) {
+                if (uDemoToneMap > 0.5) {
+                  float a = clamp(demo.a, 0.0, 1.0);
+                  vec3 straight = a > 0.001 ? (demo.rgb / a) : vec3(0.0);
+                  vec3 dRgb = linearToSRGB(acesToneMap(straight));
+                  stageCol = mix(uBg2, dRgb, a);
+                } else {
+                  stageCol = linearToSRGB(demo.rgb);
+                }
+              } else {
+                stageCol = mix(uBg2, linearToSRGB(demo.rgb), clamp(demo.a, 0.0, 1.0));
+              }
+              osCol = mix(stageCol, uiSRGB, clamp(ui.a, 0.0, 1.0));
+            }
+
+            if (uCrt >= 0.999) {
+              finalCol = osCol;
+            } else {
+              float u = clamp((uCrt - 0.28) / 0.72, 0.0, 1.0);
+              float e = 1.0 - pow(1.0 - u, 2.5);
+              float halfH = max(0.003, 0.5 * e);
+              float dy = abs(topUv.y - 0.5);
+              if (dy <= halfH) {
+                float gray = max(0.0, 1.0 - max(0.0, (u - 0.56) / 0.44));
+                if (gray > 0.005) {
+                  float lum = dot(osCol, vec3(0.2126, 0.7152, 0.0722));
+                  osCol = mix(osCol, vec3(lum), gray);
+                  osCol *= (1.0 + gray * 0.32);
+                  osCol = (osCol - 0.5) * (1.0 + gray * 0.16) + 0.5;
+                  osCol = clamp(osCol, 0.0, 1.0);
+                }
+                finalCol = osCol;
+              }
+              float lineA = max(0.0, 1.0 - e * 1.85);
+              if (lineA > 0.01) {
+                float core = smoothstep(0.0035, 0.0015, dy);
+                float glow = exp(-dy * 65.0) * 0.65;
+                finalCol = mix(finalCol, vec3(1.0), clamp((core + glow) * lineA, 0.0, 1.0));
+              }
+            }
+          }
+        }
+
+        if (uOutputLinear > 0.5) {
+          finalCol = srgbToLinear(finalCol);
+        }
+        gl_FragColor = vec4(finalCol, 1.0);
+      }
+    `;
+
+    const stageRectUniform = new THREE.Vector4(
+      STAGE_RECT.x / SCR_W, STAGE_RECT.y / SCR_H, STAGE_RECT.w / SCR_W, STAGE_RECT.h / SCR_H
+    );
+    const bg2Uniform = new THREE.Vector3(28 / 255, 26 / 255, 24 / 255);
+
+    const screenOpenUniforms = {
+      uUiTex: { value: uiTex },
+      uDemoTex: { value: demoRT.texture },
+      uStageRect: { value: stageRectUniform },
+      uBg2: { value: bg2Uniform },
+      uDemoIsLinear: { value: 1.0 },
+      uDemoToneMap: { value: 0.0 },
+      uCrt: { value: 1.0 },
+      uOutputLinear: { value: 0.0 }
+    };
+    const screenOpenMat = new THREE.ShaderMaterial({
+      vertexShader: screenVertShader,
+      fragmentShader: screenFragShader,
+      uniforms: screenOpenUniforms,
+      toneMapped: false
+    });
+
+    const crtUniforms = {
+      uUiTex: { value: uiTex },
+      uDemoTex: { value: demoRT.texture },
+      uStageRect: { value: stageRectUniform },
+      uBg2: { value: bg2Uniform },
+      uDemoIsLinear: { value: 1.0 },
+      uDemoToneMap: { value: 0.0 },
+      uCrt: { value: 0.0 },
+      uOutputLinear: { value: 1.0 }
+    };
+    const crtMat = new THREE.ShaderMaterial({
+      vertexShader: crtQuadVertShader,
+      fragmentShader: screenFragShader,
+      uniforms: crtUniforms,
+      depthTest: false,
+      depthWrite: false,
+      toneMapped: false
+    });
+    const crtScene = new THREE.Scene();
+    const crtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    crtScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), crtMat));
+
+    function syncScreenUniforms() {
+      const isLight = getTheme() === 'light';
+      if (isLight) bg2Uniform.set(234 / 255, 228 / 255, 216 / 255);
+      else bg2Uniform.set(28 / 255, 26 / 255, 24 / 255);
+      const isSrgan = activeKey === 'srgan';
+      const isAnki = activeKey === 'anki';
+      const demoTex = isSrgan ? srganTex : demoRT.texture;
+      screenOpenUniforms.uDemoTex.value = demoTex;
+      screenOpenUniforms.uDemoIsLinear.value = isSrgan ? 0.0 : 1.0;
+      screenOpenUniforms.uDemoToneMap.value = isAnki ? 1.0 : 0.0;
+      crtUniforms.uDemoTex.value = demoTex;
+      crtUniforms.uDemoIsLinear.value = isSrgan ? 0.0 : 1.0;
+      crtUniforms.uDemoToneMap.value = isAnki ? 1.0 : 0.0;
+    }
+
+    let demoTarget = null;
     let demoCtrl = null;
     let activeKey = null;
     let hoveredBtnId = null;
@@ -577,6 +917,9 @@ window.TSB3D = (() => {
     let srganScale = 4, srganSplit = 0.58;
     let bobDebiased = true;
     let churnView = 'cluster';
+    let uiDirty = true;
+    let lastDrawnSliceVal = -1;
+    let lastDrawnBrainAuto = null;
 
     function wrapLines(ctx, text, maxW) {
       const words = String(text || '').split(/\s+/);
@@ -594,92 +937,155 @@ window.TSB3D = (() => {
     function disposeDemo() {
       if (demoCtrl?.dispose) demoCtrl.dispose();
       demoCtrl = null;
-      demoCanvas = null;
+      demoTarget = null;
     }
 
     function mountProjectInScreen(key) {
       disposeDemo();
       activeKey = key;
+      uiDirty = true;
+      lastDrawnSliceVal = -1;
+      lastDrawnBrainAuto = null;
       const lang = osCfg?.getLang ? osCfg.getLang() : 'fr';
 
-      demoCanvas = document.createElement('canvas');
-      demoCanvas.width = STAGE_RECT.w;
-      demoCanvas.height = STAGE_RECT.h;
-
-      if (key === 'anki') {
-        demoHudLeft = '01 / 05 · ANKICARDSGENERATOR';
-        demoHudRight = lang === 'fr' ? 'Cliquer / glisser' : 'Click / drag';
-        demoCtrl = createAnki3D(demoCanvas, () => (osCfg?.getLang ? osCfg.getLang() : 'fr'), (idx, tag) => {
-          demoHudLeft = `${idx} · ${tag}`;
-        });
-      } else if (key === 'alzheimer') {
-        brainSliceVal = 132; brainAuto = true;
-        demoHudLeft = 'OASIS-1 · 3D CORTEX';
-        demoHudRight = 'SLICE 132';
-        demoCtrl = createBrain3D(demoCanvas, (s, attn) => {
-          brainSliceVal = s;
-          demoHudRight = `SLICE ${s} · MIL ${(attn * 100).toFixed(1)}%`;
-        });
-      } else if (key === 'srgan') {
+      if (key === 'srgan') {
+        demoTarget = srganCanvas;
         srganScale = 4; srganSplit = 0.58;
         demoHudLeft = 'WASSERSTEIN SRGAN';
         demoHudRight = 'LR ×1  |  HR ×4';
-        demoCtrl = createSrganLab(demoCanvas);
-      } else if (key === 'bobslay') {
-        bobDebiased = true;
-        demoHudLeft = 'OFF × ON × UPDRS';
-        demoHudRight = 'DEBIASED';
-        demoCtrl = createBobslay3D(demoCanvas);
-      } else if (key === 'churn') {
-        churnView = 'cluster';
-        demoHudLeft = lang === 'fr' ? 'KUBERNETES · CLIQUER AU CENTRE POUR XGBOOST' : 'KUBERNETES · CLICK CENTER FOR XGBOOST';
-        demoHudRight = 'ROC AUC 0.865 · RAPPEL 78%';
-        demoCtrl = createChurn3D(
-          demoCanvas,
-          (m) => {
-            churnView = m;
-            const l = osCfg?.getLang ? osCfg.getLang() : 'fr';
-            demoHudLeft = m === 'algo'
-              ? (l === 'fr' ? 'XGBOOST · ARBRE DE DÉCISION & RELIEF DE CHURN' : 'XGBOOST · DECISION TREE & CHURN LANDSCAPE')
-              : (l === 'fr' ? 'KUBERNETES · CLIQUER AU CENTRE POUR XGBOOST' : 'KUBERNETES · CLICK CENTER FOR XGBOOST');
-          },
-          (ruleStr) => { if (churnView === 'algo') demoHudLeft = ruleStr; }
-        );
+        demoCtrl = createSrganLab(srganCanvas);
+      } else {
+        demoTarget = {
+          width: STAGE_RECT.w,
+          height: STAGE_RECT.h,
+          sharedRenderer: renderer,
+          renderTarget: demoRT,
+          getClearColor: () => (getTheme() === 'light' ? 0xeae4d8 : 0x1c1a18)
+        };
+        if (key === 'anki') {
+          demoHudLeft = '01 / 05 · ANKICARDSGENERATOR';
+          demoHudRight = lang === 'fr' ? 'Cliquer / glisser' : 'Click / drag';
+          demoCtrl = createAnki3D(demoTarget, () => (osCfg?.getLang ? osCfg.getLang() : 'fr'), (idx, tag) => {
+            demoHudLeft = `${idx} · ${tag}`;
+            uiDirty = true;
+          });
+        } else if (key === 'alzheimer') {
+          brainSliceVal = 132; brainAuto = true;
+          demoHudLeft = 'OASIS-1 · 3D CORTEX';
+          demoHudRight = 'SLICE 132';
+          demoCtrl = createBrain3D(demoTarget, (s, attn) => {
+            brainSliceVal = s;
+            demoHudRight = `SLICE ${s} · MIL ${(attn * 100).toFixed(1)}%`;
+          });
+        } else if (key === 'bobslay') {
+          bobDebiased = true;
+          demoHudLeft = 'OFF × ON × UPDRS';
+          demoHudRight = 'DEBIASED';
+          demoCtrl = createBobslay3D(demoTarget);
+        } else if (key === 'churn') {
+          churnView = 'cluster';
+          demoHudLeft = lang === 'fr' ? 'KUBERNETES · CLIQUER AU CENTRE POUR XGBOOST' : 'KUBERNETES · CLICK CENTER FOR XGBOOST';
+          demoHudRight = 'ROC AUC 0.865 · RAPPEL 78%';
+          demoCtrl = createChurn3D(
+            demoTarget,
+            (m) => {
+              churnView = m;
+              uiDirty = true;
+              const l = osCfg?.getLang ? osCfg.getLang() : 'fr';
+              demoHudLeft = m === 'algo'
+                ? (l === 'fr' ? 'XGBOOST · ARBRE DE DÉCISION & RELIEF DE CHURN' : 'XGBOOST · DECISION TREE & CHURN LANDSCAPE')
+                : (l === 'fr' ? 'KUBERNETES · CLIQUER AU CENTRE POUR XGBOOST' : 'KUBERNETES · CLICK CENTER FOR XGBOOST');
+            },
+            (ruleStr) => { if (churnView === 'algo') { demoHudLeft = ruleStr; uiDirty = true; } }
+          );
+        }
       }
+      syncScreenUniforms();
     }
 
-    function paintScreenOS(crtV) {
-      // Sleeping pure obsidian glass
-      if (crtV <= 0.002 || !activeKey || !osCfg?.projects?.[activeKey]) {
-        sCtx.fillStyle = '#050608';
-        sCtx.fillRect(0, 0, SCR_W, SCR_H);
-        screenTex.needsUpdate = true;
-        return;
-      }
+    function getThemePalette() {
+      const isLight = getTheme() === 'light';
+      return {
+        isLight,
+        BG: isLight ? '#f3efe6' : '#141312',
+        BG2: isLight ? '#eae4d8' : '#1c1a18',
+        INK: isLight ? '#1b1917' : '#efeae0',
+        INK2: isLight ? '#5d574e' : '#a39c90',
+        INK3: isLight ? '#8c8478' : '#6c665d',
+        LINE: isLight ? 'rgba(27,25,23,0.14)' : 'rgba(239,234,224,0.14)',
+        ACC: isLight ? '#c93f24' : '#e05336',
+        ACC_INK: isLight ? '#f8f5ee' : '#141312'
+      };
+    }
 
+    function drawBtnOn(ctx, pal, registerBtn, id, x, y, w, h, label, accent, active, action) {
+      const isHov = hoveredBtnId === id;
+      if (registerBtn) uiButtons.push({ id, x, y, w, h, action });
+      ctx.fillStyle = (accent && (isHov || active)) || active ? pal.ACC : (isHov ? (pal.isLight ? 'rgba(27,25,23,0.08)' : 'rgba(239,234,224,0.09)') : 'transparent');
+      ctx.strokeStyle = accent || active ? pal.ACC : (isHov ? pal.INK : pal.LINE);
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(x, y, w, h, 5);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = (accent && (isHov || active)) || active ? pal.ACC_INK : (accent ? pal.ACC : (isHov ? pal.INK : pal.INK2));
+      ctx.font = '600 17px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, x + w / 2, y + h / 2 + 1);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    }
+
+    function drawHudChips(ctx, pal) {
+      ctx.clearRect(STAGE_RECT.x, STAGE_RECT.y, STAGE_RECT.w, STAGE_RECT.h);
+      function drawChip(x, y, txt, alignRight) {
+        ctx.font = '500 15px "JetBrains Mono", monospace';
+        const tw = ctx.measureText(txt).width + 26;
+        const rx = alignRight ? x - tw : x;
+        ctx.fillStyle = pal.isLight ? 'rgba(243,239,230,0.86)' : 'rgba(20,19,18,0.82)';
+        ctx.strokeStyle = pal.LINE; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(rx, y, tw, 34, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = pal.INK; ctx.fillText(txt, rx + 13, y + 22);
+      }
+      if (demoHudLeft) drawChip(24, 96, demoHudLeft, false);
+      if (demoHudRight) drawChip(1004, 96, demoHudRight, true);
+    }
+
+    function drawAlzheimerBottom(ctx, pal, registerBtn) {
+      ctx.fillStyle = pal.BG;
+      ctx.fillRect(0, 912, 1026, 88);
+      ctx.fillStyle = pal.INK2; ctx.font = '500 16px "JetBrains Mono", monospace';
+      ctx.fillText(`SLICE  ${brainSliceVal}`, 28, 961);
+      const sx = 160, sw = 340, sy = 954;
+      if (registerBtn) {
+        uiButtons.push({ id: 'brainBar', x: sx, y: 932, w: sw, h: 46, isSlider: true, action: (px) => {
+          brainAuto = false;
+          const s = 100 + Math.round(Math.max(0, Math.min(1, (px - sx) / sw)) * 60);
+          brainSliceVal = s; demoCtrl?.setSlice(s);
+          uiDirty = true;
+        }});
+      }
+      ctx.fillStyle = pal.LINE; ctx.fillRect(sx, sy - 3, sw, 6);
+      const frac = (brainSliceVal - 100) / 60;
+      ctx.fillStyle = pal.ACC; ctx.fillRect(sx, sy - 3, sw * frac, 6);
+      ctx.beginPath(); ctx.arc(sx + sw * frac, sy, 9, 0, Math.PI * 2); ctx.fill();
+      drawBtnOn(ctx, pal, registerBtn, 'brainAuto', 836, 933, 166, 44, 'AUTO SCAN', true, brainAuto, () => {
+        brainAuto = true; demoCtrl?.setAuto(true); uiDirty = true;
+      });
+      lastDrawnSliceVal = brainSliceVal;
+      lastDrawnBrainAuto = brainAuto;
+    }
+
+    function paintStaticUI(pal) {
       const d = osCfg.projects[activeKey];
       const lang = osCfg.getLang ? osCfg.getLang() : 'fr';
-      const isLight = getTheme() === 'light';
 
-      const BG = isLight ? '#f3efe6' : '#141312';
-      const BG2 = isLight ? '#eae4d8' : '#1c1a18';
-      const INK = isLight ? '#1b1917' : '#efeae0';
-      const INK2 = isLight ? '#5d574e' : '#a39c90';
-      const INK3 = isLight ? '#8c8478' : '#6c665d';
-      const LINE = isLight ? 'rgba(27,25,23,0.14)' : 'rgba(239,234,224,0.14)';
-      const ACC = isLight ? '#c93f24' : '#e05336';
-      const ACC_INK = isLight ? '#f8f5ee' : '#141312';
-
-      // 1. Paint full crisp OS layout into uiCanvas
-      uCtx.fillStyle = BG;
+      uCtx.fillStyle = pal.BG;
       uCtx.fillRect(0, 0, SCR_W, SCR_H);
 
-      // Left stage background
-      uCtx.fillStyle = BG2;
+      // Left stage surround
+      uCtx.fillStyle = pal.BG2;
       uCtx.fillRect(0, 74, 1028, 836);
 
       // Structural hairlines
-      uCtx.strokeStyle = LINE; uCtx.lineWidth = 1.5;
+      uCtx.strokeStyle = pal.LINE; uCtx.lineWidth = 1.5;
       uCtx.beginPath();
       uCtx.moveTo(0, 74); uCtx.lineTo(SCR_W, 74);
       uCtx.moveTo(1028, 74); uCtx.lineTo(1028, SCR_H);
@@ -687,125 +1093,92 @@ window.TSB3D = (() => {
       uCtx.stroke();
 
       uiButtons = [];
-      function drawBtn(id, x, y, w, h, label, accent, active, action) {
-        const isHov = hoveredBtnId === id;
-        uiButtons.push({ id, x, y, w, h, action });
-        uCtx.fillStyle = (accent && (isHov || active)) || active ? ACC : (isHov ? (isLight ? 'rgba(27,25,23,0.08)' : 'rgba(239,234,224,0.09)') : 'transparent');
-        uCtx.strokeStyle = accent || active ? ACC : (isHov ? INK : LINE);
-        uCtx.lineWidth = 1.6;
-        uCtx.beginPath(); uCtx.roundRect(x, y, w, h, 5);
-        uCtx.fill(); uCtx.stroke();
-        uCtx.fillStyle = (accent && (isHov || active)) || active ? ACC_INK : (accent ? ACC : (isHov ? INK : INK2));
-        uCtx.font = '600 17px "JetBrains Mono", monospace';
-        uCtx.textAlign = 'center'; uCtx.textBaseline = 'middle';
-        uCtx.fillText(label, x + w / 2, y + h / 2 + 1);
-        uCtx.textAlign = 'left'; uCtx.textBaseline = 'alphabetic';
-      }
+      const drawBtn = (id, x, y, w, h, label, accent, active, action) => drawBtnOn(uCtx, pal, true, id, x, y, w, h, label, accent, active, action);
 
       // Top OS bar
-      uCtx.fillStyle = ACC;
+      uCtx.fillStyle = pal.ACC;
       uCtx.beginPath(); uCtx.arc(36, 37, 6, 0, Math.PI * 2); uCtx.fill();
       uCtx.font = '600 18px "JetBrains Mono", monospace';
-      uCtx.fillStyle = INK2; uCtx.fillText('TIMOTHEE.OS  /', 54, 43);
-      uCtx.fillStyle = ACC; uCtx.fillText(d.num, 224, 43);
-      uCtx.fillStyle = INK2; uCtx.fillText(`—  ${d.cat[lang].toUpperCase()}`, 264, 43);
+      uCtx.fillStyle = pal.INK2; uCtx.fillText('TIMOTHEE.OS  /', 54, 43);
+      uCtx.fillStyle = pal.ACC; uCtx.fillText(d.num, 224, 43);
+      uCtx.fillStyle = pal.INK2; uCtx.fillText(`—  ${d.cat[lang].toUpperCase()}`, 264, 43);
 
       drawBtn('prev', 1304, 17, 50, 40, '←', false, false, () => stepProject(-1));
       drawBtn('next', 1364, 17, 50, 40, '→', false, false, () => stepProject(1));
       drawBtn('close', 1426, 17, 146, 40, lang === 'fr' ? '← BUREAU' : '← DESK', true, false, () => returnToDesk());
 
-      // Composite LIVE 3D project canvas directly onto the MacBook screen!
-      if (demoCanvas) {
-        uCtx.drawImage(demoCanvas, STAGE_RECT.x, STAGE_RECT.y, STAGE_RECT.w, STAGE_RECT.h);
-      }
-
-      // Stage HUD chips
-      function drawChip(x, y, txt, alignRight) {
-        uCtx.font = '500 15px "JetBrains Mono", monospace';
-        const tw = uCtx.measureText(txt).width + 26;
-        const rx = alignRight ? x - tw : x;
-        uCtx.fillStyle = isLight ? 'rgba(243,239,230,0.86)' : 'rgba(20,19,18,0.82)';
-        uCtx.strokeStyle = LINE; uCtx.lineWidth = 1.2;
-        uCtx.beginPath(); uCtx.roundRect(rx, y, tw, 34, 5); uCtx.fill(); uCtx.stroke();
-        uCtx.fillStyle = INK; uCtx.fillText(txt, rx + 13, y + 22);
-      }
-      if (demoHudLeft) drawChip(24, 96, demoHudLeft, false);
-      if (demoHudRight) drawChip(1004, 96, demoHudRight, true);
+      // Transparent stage cutout + floating HUD chips
+      drawHudChips(uCtx, pal);
 
       // Left Bottom Controls Bar (y = 910..1000)
       if (activeKey === 'anki') {
         drawBtn('ankiFlip', 26, 933, 250, 44, lang === 'fr' ? 'RETOURNER LA CARTE' : 'FLIP CARD', true, false, () => demoCtrl?.flipCard());
         drawBtn('ankiNext', 290, 933, 224, 44, lang === 'fr' ? 'CARTE SUIVANTE →' : 'NEXT CARD →', false, false, () => demoCtrl?.nextCard());
-        uCtx.fillStyle = INK3; uCtx.font = '500 16px "JetBrains Mono", monospace';
+        uCtx.fillStyle = pal.INK3; uCtx.font = '500 16px "JetBrains Mono", monospace';
         uCtx.textAlign = 'right'; uCtx.fillText('FIELDNOTE · STUDIO UI', 1002, 961); uCtx.textAlign = 'left';
       } else if (activeKey === 'alzheimer') {
-        uCtx.fillStyle = INK2; uCtx.font = '500 16px "JetBrains Mono", monospace';
-        uCtx.fillText(`SLICE  ${brainSliceVal}`, 28, 961);
-        const sx = 160, sw = 340, sy = 954;
-        uiButtons.push({ id: 'brainBar', x: sx, y: 932, w: sw, h: 46, isSlider: true, action: (px) => {
-          brainAuto = false;
-          const s = 100 + Math.round(Math.max(0, Math.min(1, (px - sx) / sw)) * 60);
-          brainSliceVal = s; demoCtrl?.setSlice(s);
-        }});
-        uCtx.fillStyle = LINE; uCtx.fillRect(sx, sy - 3, sw, 6);
-        const frac = (brainSliceVal - 100) / 60;
-        uCtx.fillStyle = ACC; uCtx.fillRect(sx, sy - 3, sw * frac, 6);
-        uCtx.beginPath(); uCtx.arc(sx + sw * frac, sy, 9, 0, Math.PI * 2); uCtx.fill();
-        drawBtn('brainAuto', 836, 933, 166, 44, 'AUTO SCAN', true, brainAuto, () => { brainAuto = true; demoCtrl?.setAuto(true); });
+        drawAlzheimerBottom(uCtx, pal, true);
       } else if (activeKey === 'srgan') {
         [1, 2, 4].forEach((sc, i) => {
-          drawBtn(`sr${sc}`, 26 + i * 74, 933, 62, 44, `×${sc}`, true, srganScale === sc, () => { srganScale = sc; demoCtrl?.setScale(sc); demoHudRight = `LR ×1  |  HR ×${sc}`; });
+          drawBtn(`sr${sc}`, 26 + i * 74, 933, 62, 44, `×${sc}`, true, srganScale === sc, () => {
+            srganScale = sc; demoCtrl?.setScale(sc); demoHudRight = `LR ×1  |  HR ×${sc}`; uiDirty = true;
+          });
         });
-        uCtx.fillStyle = INK2; uCtx.font = '500 16px "JetBrains Mono", monospace';
+        uCtx.fillStyle = pal.INK2; uCtx.font = '500 16px "JetBrains Mono", monospace';
         uCtx.fillText('LR | HR', 606, 961);
         const sx = 696, sw = 304, sy = 954;
         uiButtons.push({ id: 'srBar', x: sx, y: 932, w: sw, h: 46, isSlider: true, action: (px) => {
           srganSplit = Math.max(0.06, Math.min(0.94, (px - sx) / sw));
           demoCtrl?.setSplit(srganSplit);
+          uiDirty = true;
         }});
-        uCtx.fillStyle = LINE; uCtx.fillRect(sx, sy - 3, sw, 6);
-        uCtx.fillStyle = ACC; uCtx.fillRect(sx, sy - 3, sw * srganSplit, 6);
+        uCtx.fillStyle = pal.LINE; uCtx.fillRect(sx, sy - 3, sw, 6);
+        uCtx.fillStyle = pal.ACC; uCtx.fillRect(sx, sy - 3, sw * srganSplit, 6);
         uCtx.beginPath(); uCtx.arc(sx + sw * srganSplit, sy, 9, 0, Math.PI * 2); uCtx.fill();
       } else if (activeKey === 'bobslay') {
-        drawBtn('bobRaw', 26, 933, 128, 44, lang === 'fr' ? 'BRUT' : 'RAW', true, !bobDebiased, () => { bobDebiased = false; demoCtrl?.setMode(false); demoHudRight = 'RAW'; });
-        drawBtn('bobFix', 166, 933, 152, 44, lang === 'fr' ? 'CORRIGÉ' : 'DEBIASED', true, bobDebiased, () => { bobDebiased = true; demoCtrl?.setMode(true); demoHudRight = 'DEBIASED'; });
-        uCtx.fillStyle = INK3; uCtx.font = '500 16px "JetBrains Mono", monospace';
+        drawBtn('bobRaw', 26, 933, 128, 44, lang === 'fr' ? 'BRUT' : 'RAW', true, !bobDebiased, () => {
+          bobDebiased = false; demoCtrl?.setMode(false); demoHudRight = 'RAW'; uiDirty = true;
+        });
+        drawBtn('bobFix', 166, 933, 152, 44, lang === 'fr' ? 'CORRIGÉ' : 'DEBIASED', true, bobDebiased, () => {
+          bobDebiased = true; demoCtrl?.setMode(true); demoHudRight = 'DEBIASED'; uiDirty = true;
+        });
+        uCtx.fillStyle = pal.INK3; uCtx.font = '500 16px "JetBrains Mono", monospace';
         uCtx.textAlign = 'right'; uCtx.fillText('44 590 VISITS · GROUPKFOLD', 1002, 961); uCtx.textAlign = 'left';
       } else if (activeKey === 'churn') {
         const lbl = churnView === 'algo'
           ? (lang === 'fr' ? '← RETOUR CLUSTER K8S' : '← BACK TO K8S CLUSTER')
           : (lang === 'fr' ? 'VOIR L’ALGO XGBOOST ▸' : 'INSPECT XGBOOST ▸');
-        drawBtn('churnToggle', 26, 933, 294, 44, lbl, true, false, () => demoCtrl?.toggleView());
-        uCtx.fillStyle = INK3; uCtx.font = '500 15px "JetBrains Mono", monospace';
+        drawBtn('churnToggle', 26, 933, 294, 44, lbl, true, false, () => { demoCtrl?.toggleView(); uiDirty = true; });
+        uCtx.fillStyle = pal.INK3; uCtx.font = '500 15px "JetBrains Mono", monospace';
         uCtx.textAlign = 'right'; uCtx.fillText('GRADIO MCP · FASTAPI · GITLAB CI', 1002, 961); uCtx.textAlign = 'left';
       }
 
       // Right Info Column (x = 1028..1600)
       const rx = 1068, rw = 496;
-      uCtx.fillStyle = INK3; uCtx.font = '500 18px "JetBrains Mono", monospace';
+      uCtx.fillStyle = pal.INK3; uCtx.font = '500 18px "JetBrains Mono", monospace';
       uCtx.fillText(d.date[lang], rx, 132);
 
-      uCtx.fillStyle = INK; uCtx.font = '600 44px "Space Grotesk", sans-serif';
+      uCtx.fillStyle = pal.INK; uCtx.font = '600 44px "Space Grotesk", sans-serif';
       const titleLines = wrapLines(uCtx, d.title, rw);
       let cy = 192;
       titleLines.forEach((l) => { uCtx.fillText(l, rx, cy); cy += 52; });
 
       cy += 10;
-      uCtx.fillStyle = INK2; uCtx.font = '400 22px "Inter", sans-serif';
+      uCtx.fillStyle = pal.INK2; uCtx.font = '400 22px "Inter", sans-serif';
       const descLines = wrapLines(uCtx, d.desc[lang], rw);
       descLines.forEach((l) => { uCtx.fillText(l, rx, cy); cy += 34; });
 
       // 3-column metrics strip
       cy += 22;
       const mw = rw / d.metrics.length;
-      uCtx.strokeStyle = LINE; uCtx.lineWidth = 1.4;
+      uCtx.strokeStyle = pal.LINE; uCtx.lineWidth = 1.4;
       uCtx.strokeRect(rx, cy, rw, 108);
       d.metrics.forEach((m, i) => {
         const mx = rx + i * mw;
         if (i > 0) { uCtx.beginPath(); uCtx.moveTo(mx, cy); uCtx.lineTo(mx, cy + 108); uCtx.stroke(); }
-        uCtx.fillStyle = ACC; uCtx.font = '600 28px "Space Grotesk", sans-serif';
+        uCtx.fillStyle = pal.ACC; uCtx.font = '600 28px "Space Grotesk", sans-serif';
         uCtx.fillText(m.val, mx + 16, cy + 48);
-        uCtx.fillStyle = INK3; uCtx.font = '500 15px "JetBrains Mono", monospace';
+        uCtx.fillStyle = pal.INK3; uCtx.font = '500 15px "JetBrains Mono", monospace';
         uCtx.fillText(m.lbl[lang], mx + 16, cy + 82);
       });
 
@@ -816,9 +1189,9 @@ window.TSB3D = (() => {
       d.stack.forEach((st) => {
         const sw = uCtx.measureText(st).width + 24;
         if (sx + sw > rx + rw) { sx = rx; sy += 44; }
-        uCtx.strokeStyle = LINE; uCtx.lineWidth = 1.2;
+        uCtx.strokeStyle = pal.LINE; uCtx.lineWidth = 1.2;
         uCtx.beginPath(); uCtx.roundRect(sx, sy, sw, 34, 5); uCtx.stroke();
-        uCtx.fillStyle = INK2; uCtx.fillText(st, sx + 12, sy + 22);
+        uCtx.fillStyle = pal.INK2; uCtx.fillText(st, sx + 12, sy + 22);
         sx += sw + 10;
       });
 
@@ -826,59 +1199,50 @@ window.TSB3D = (() => {
       const repoHov = hoveredBtnId === 'repo';
       const repoRect = { id: 'repo', x: rx, y: 892, w: 284, h: 60, action: () => window.open(d.repo, '_blank', 'noopener,noreferrer') };
       uiButtons.push(repoRect);
-      uCtx.fillStyle = repoHov ? ACC : INK;
+      uCtx.fillStyle = repoHov ? pal.ACC : pal.INK;
       uCtx.beginPath(); uCtx.roundRect(repoRect.x, repoRect.y, repoRect.w, repoRect.h, 6); uCtx.fill();
-      uCtx.fillStyle = repoHov ? ACC_INK : BG;
+      uCtx.fillStyle = repoHov ? pal.ACC_INK : pal.BG;
       uCtx.font = '600 18px "JetBrains Mono", monospace';
       uCtx.textAlign = 'center'; uCtx.textBaseline = 'middle';
       uCtx.fillText(`${lang === 'fr' ? 'VOIR LE DÉPÔT' : 'OPEN REPOSITORY'}  ↗`, repoRect.x + repoRect.w / 2, repoRect.y + repoRect.h / 2 + 1);
       uCtx.textAlign = 'left'; uCtx.textBaseline = 'alphabetic';
 
-      // 2. Apply VINTAGE B&W CRT TV POWER-ON / POWER-OFF EFFECT directly into screenCanvas!
-      sCtx.save();
-      sCtx.fillStyle = '#050608';
-      sCtx.fillRect(0, 0, SCR_W, SCR_H);
+      uiDirty = false;
+      uiTex.needsUpdate = true;
+    }
 
-      if (crtV < 0.28) {
-        // Pure white horizontal CRT line shooting out from center (or pinching down to center dot on shutoff!)
-        const u = crtV / 0.28;
-        const easeW = 1 - Math.pow(1 - u, 3);
-        const lineW = Math.max(12, SCR_W * easeW);
-        const lx = (SCR_W - lineW) * 0.5;
-        sCtx.shadowColor = '#ffffff';
-        sCtx.shadowBlur = 28;
-        sCtx.fillStyle = `rgba(255,255,255,${Math.min(1, u * 3.2).toFixed(3)})`;
-        sCtx.fillRect(lx, SCR_H * 0.5 - 3, lineW, 6);
-        sCtx.shadowBlur = 0;
-      } else {
-        const u = Math.min(1, (crtV - 0.28) / 0.72);
-        const e = 1 - Math.pow(1 - u, 2.5);
-        const halfH = Math.max(3, (SCR_H * 0.5) * e);
-        const gray = Math.max(0, 1 - Math.max(0, (u - 0.56) / 0.44));
-
-        // Symmetric vertical clip opening up & down from the exact horizontal center!
-        sCtx.save();
-        sCtx.beginPath();
-        sCtx.rect(0, SCR_H * 0.5 - halfH, SCR_W, halfH * 2);
-        sCtx.clip();
-        if (gray > 0.01) {
-          sCtx.filter = `grayscale(${gray.toFixed(2)}) brightness(${(1 + gray * 0.32).toFixed(2)}) contrast(${(1 + gray * 0.16).toFixed(2)})`;
-        }
-        sCtx.drawImage(uiCanvas, 0, 0);
-        sCtx.filter = 'none';
-        sCtx.restore();
-
-        // Residual bright white horizontal scan line fading as the CRT curtain opens
-        const lineA = Math.max(0, 1 - e * 1.85);
-        if (lineA > 0.01) {
-          sCtx.shadowColor = '#ffffff'; sCtx.shadowBlur = 22;
-          sCtx.fillStyle = `rgba(255,255,255,${lineA.toFixed(3)})`;
-          sCtx.fillRect(0, SCR_H * 0.5 - 2.5, SCR_W, 5);
-          sCtx.shadowBlur = 0;
-        }
+    function updateScreenOS(crtV, renderCrtPass) {
+      if (crtV <= 0.002 || !activeKey || !osCfg?.projects?.[activeKey]) {
+        crtUniforms.uCrt.value = 0.0;
+        return;
       }
-      sCtx.restore();
-      screenTex.needsUpdate = true;
+
+      const pal = getThemePalette();
+      if (uiDirty) {
+        paintStaticUI(pal);
+      } else if (activeKey === 'alzheimer' && (brainSliceVal !== lastDrawnSliceVal || brainAuto !== lastDrawnBrainAuto)) {
+        drawHudChips(uCtx, pal);
+        drawAlzheimerBottom(uCtx, pal, false);
+        uiTex.needsUpdate = true;
+      }
+
+      if (activeKey === 'srgan') {
+        const changed = demoCtrl?.renderFrame?.();
+        if (changed) srganTex.needsUpdate = true;
+      } else {
+        demoCtrl?.renderFrame?.();
+      }
+
+      if (renderCrtPass) {
+        crtUniforms.uCrt.value = crtV;
+        const prevRT = renderer.getRenderTarget();
+        const prevTone = renderer.toneMapping;
+        renderer.setRenderTarget(screenRT);
+        renderer.toneMapping = THREE.NoToneMapping;
+        renderer.render(crtScene, crtCamera);
+        renderer.setRenderTarget(prevRT);
+        renderer.toneMapping = prevTone;
+      }
     }
 
     /* ---------- PHOTOREALISTIC SPACE BLACK MACBOOK PRO M3 (REAL GLB MODEL) ---------- */
@@ -899,6 +1263,25 @@ window.TSB3D = (() => {
     const screenLight = new THREE.PointLight(0xffdfb8, 0, 7.5, 0.6);
     screenLight.position.set(0, 0, 1.05);
     screenAnchor.add(screenLight);
+
+    function warmUpDeskGPU() {
+      // Pre-compile all shaders (desk + both screen materials + GPU CRT pass) & upload textures + shadow map off-scroll
+      if (realScreenMesh && macScreenMat) {
+        const prevMat = realScreenMesh.material;
+        realScreenMesh.material = screenOpenMat;
+        renderer.compile(scene, camera);
+        realScreenMesh.material = macScreenMat;
+        renderer.compile(scene, camera);
+        realScreenMesh.material = prevMat;
+      } else {
+        renderer.compile(scene, camera);
+      }
+      renderer.compile(crtScene, crtCamera);
+      renderer.shadowMap.needsUpdate = true;
+      renderer.render(scene, camera);
+      // Pre-compute Alzheimer brain point cloud geometry cache during idle so first click has 0ms stall
+      getBrainPointCloudData();
+    }
 
     if (typeof window.THREE_GLTFLoader !== 'undefined') {
       const loader = new window.THREE_GLTFLoader();
@@ -933,10 +1316,20 @@ window.TSB3D = (() => {
         model.updateMatrixWorld(true);
 
         const scaledBox = new THREE.Box3().setFromObject(model);
+        const scaledSize = scaledBox.getSize(new THREE.Vector3());
         const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
         model.position.set(-scaledCenter.x, -scaledBox.min.y, -scaledCenter.z);
         laptopRoot.add(model);
         laptopRoot.updateMatrixWorld(true);
+
+        // Lightweight invisible hitbox for desk hover/click (replaces raycasting 9,471-triangle LidMesh!)
+        const laptopHitbox = new THREE.Mesh(
+          new THREE.BoxGeometry(scaledSize.x, scaledSize.y, scaledSize.z),
+          new THREE.MeshBasicMaterial({ visible: false })
+        );
+        laptopHitbox.position.set(0, scaledSize.y * 0.5, 0);
+        laptopRoot.add(laptopHitbox);
+        laptopHitMeshes.push(laptopHitbox);
 
         const realScreen = model.getObjectByName('Screen');
         if (realScreen && realScreen.isMesh) {
@@ -944,10 +1337,9 @@ window.TSB3D = (() => {
           // THE ACTUAL 3D SCREEN MESH OF THE MACBOOK PRO IS THE INTERFACE!
           // Glossy dark glass reflections when sleeping -> 100% pure zero-haze full-contrast emissive display when awake!
           macScreenMat = new THREE.MeshPhysicalMaterial({
-            map: screenTex,
             color: new THREE.Color(0x000000),
             emissive: new THREE.Color(0xffffff),
-            emissiveMap: screenTex,
+            emissiveMap: screenRT.texture,
             emissiveIntensity: 0.0,
             roughness: 0.16,
             metalness: 0.0,
@@ -959,7 +1351,6 @@ window.TSB3D = (() => {
           });
           realScreen.material = macScreenMat;
           realScreen.castShadow = false;
-          laptopHitMeshes.push(realScreen);
 
           // Exact zero-roll camera target frame for the real Screen mesh
           realScreen.updateMatrixWorld(true);
@@ -1011,10 +1402,16 @@ window.TSB3D = (() => {
           screenAnchor.scale.set(1, 1, 1);
           deskGroup.add(screenAnchor);
           screenAnchor.updateMatrixWorld(true);
+          computeLaptopZoomTarget();
         }
 
-        const lidNode = model.getObjectByName('Lid');
-        if (lidNode) lidNode.traverse((o) => { if (o.isMesh) laptopHitMeshes.push(o); });
+        // Pre-warm GPU (compile 19 GLB PBR shaders + upload 18 textures + bake 2048x2048 shadow map)
+        // during idle time before the user scrolls down to the desk, eliminating the first-scroll stutter!
+        if (typeof window.requestIdleCallback === 'function') {
+          window.requestIdleCallback(() => warmUpDeskGPU(), { timeout: 600 });
+        } else {
+          setTimeout(() => warmUpDeskGPU(), 120);
+        }
       });
     }
 
@@ -1057,11 +1454,15 @@ window.TSB3D = (() => {
       const idx = booksData.findIndex((b) => b.key === key);
       const targetKey = idx >= 0 ? booksData[idx].key : booksData[0].key;
       if (idx >= 0) hoveredIdx = idx;
+      if (osCfg?.isMobile && osCfg.isMobile()) {
+        if (onSelect) onSelect(targetKey);
+        return;
+      }
       if (notifyParent && onSelect) onSelect(targetKey);
 
       mountProjectInScreen(targetKey);
       if (camMode === 'open') {
-        paintScreenOS(1);
+        updateScreenOS(1, false);
         return;
       }
       camMode = 'booting';
@@ -1122,6 +1523,7 @@ window.TSB3D = (() => {
         if (activeKey === 'srgan') {
           srganSplit = Math.max(0.06, Math.min(0.94, 1 - (pt.x - STAGE_RECT.x) / STAGE_RECT.w));
           demoCtrl?.setSplit(srganSplit);
+          uiDirty = true;
         }
       }
     });
@@ -1141,19 +1543,25 @@ window.TSB3D = (() => {
           if (activeKey === 'srgan') {
             srganSplit = Math.max(0.06, Math.min(0.94, 1 - (pt.x - STAGE_RECT.x) / STAGE_RECT.w));
             demoCtrl?.setSplit(srganSplit);
-          } else if (demoCanvas?._tsbDrag) {
-            demoCanvas._tsbDrag(dx * 0.72, dy * 0.72);
+            uiDirty = true;
+          } else if (demoTarget?._tsbDrag) {
+            demoTarget._tsbDrag(dx * 0.72, dy * 0.72);
           }
           canvas.style.cursor = activeKey === 'srgan' ? 'ew-resize' : 'grabbing';
           return;
         }
         const btn = findBtnAt(pt);
-        hoveredBtnId = btn ? btn.id : null;
+        const nextBtnId = btn ? btn.id : null;
+        if (nextBtnId !== hoveredBtnId) {
+          hoveredBtnId = nextBtnId;
+          uiDirty = true;
+        }
         canvas.style.cursor = btn ? (btn.isSlider ? 'ew-resize' : 'pointer') : (inStage(pt) ? (activeKey === 'srgan' ? 'ew-resize' : 'grab') : 'default');
         return;
       }
 
       if (camMode !== 'desk') return;
+      if (e.pointerType === 'touch') return;
       const r = canvas.getBoundingClientRect();
       pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
       pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
@@ -1178,7 +1586,10 @@ window.TSB3D = (() => {
 
     canvas.addEventListener('pointerleave', () => {
       parallaxX = 0; parallaxY = 0;
-      hoveredBtnId = null;
+      if (hoveredBtnId !== null) {
+        hoveredBtnId = null;
+        uiDirty = true;
+      }
       if (camMode === 'desk' && hoveredIdx !== -1) {
         hoveredIdx = -1;
         if (onHoverChange) onHoverChange(null, -1);
@@ -1192,8 +1603,8 @@ window.TSB3D = (() => {
         if (!pt) { returnToDesk(); return; } // Clicking outside the MacBook screen cleanly returns to the desk!
         const btn = findBtnAt(pt);
         if (btn && !btn.isSlider) { btn.action(pt.x); return; }
-        if (inStage(pt) && demoCanvas?._tsbClick) {
-          demoCanvas._tsbClick({
+        if (inStage(pt) && demoTarget?._tsbClick) {
+          demoTarget._tsbClick({
             normX: (pt.x - STAGE_RECT.x) / STAGE_RECT.w,
             normY: (pt.y - STAGE_RECT.y) / STAGE_RECT.h
           });
@@ -1202,11 +1613,21 @@ window.TSB3D = (() => {
       }
 
       if (camMode !== 'desk') return;
+      const r = canvas.getBoundingClientRect();
+      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+
+      const bookHits = raycaster.intersectObjects(hitMeshes, false);
+      if (bookHits.length) {
+        const hitIdx = bookHits[0].object.userData.bookIndex;
+        openProjectOnLaptop(booksData[hitIdx].key, true);
+        return;
+      }
       if (hoveredIdx >= 0) {
         openProjectOnLaptop(booksData[hoveredIdx].key, true);
         return;
       }
-      raycaster.setFromCamera(pointer, camera);
       if (laptopHitMeshes.length && raycaster.intersectObjects(laptopHitMeshes, false).length > 0) {
         openProjectOnLaptop(booksData[0].key, true);
       }
@@ -1214,12 +1635,25 @@ window.TSB3D = (() => {
 
     function syncTheme() {
       const light = getTheme() === 'light';
-      scene.environment = light ? envLight : envDark;
+      if (light) {
+        if (!envLight) envLight = buildStudioEnv(true);
+        if (!deskTexLight) deskTexLight = makeDeskTexture(true);
+        scene.environment = envLight;
+        deskMat.map = deskTexLight;
+      } else {
+        if (!envDark) envDark = buildStudioEnv(false);
+        if (!deskTexDark) deskTexDark = makeDeskTexture(false);
+        scene.environment = envDark;
+        deskMat.map = deskTexDark;
+      }
       wallMat.opacity = light ? 0.14 : 0.30;
-      deskMat.map = makeDeskTexture(light); deskMat.needsUpdate = true;
+      deskMat.needsUpdate = true;
       ambLight.intensity = light ? 0.65 : 0.30;
       lampSpot.intensity = light ? 2.1 : 2.8;
+      uiDirty = true;
+      syncScreenUniforms();
     }
+    resize();
     syncTheme();
 
     let visible = true;
@@ -1228,13 +1662,16 @@ window.TSB3D = (() => {
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
-      if (!visible && camMode === 'desk') return;
+      if (!visible && (camMode === 'desk' || camMode === 'open')) return;
       const dt = Math.min(0.05, clock.getDelta());
 
       if (camMode === 'booting') {
+        if (realScreenMesh && macScreenMat && realScreenMesh.material !== macScreenMat) {
+          realScreenMesh.material = macScreenMat;
+        }
         bootProgress = Math.min(1, bootProgress + dt * 1.45);
         if (bootProgress > 0.18) zoomProgress = Math.min(1, zoomProgress + dt * 1.45);
-        paintScreenOS(bootProgress);
+        updateScreenOS(bootProgress, true);
         if (macScreenMat) {
           const awake = Math.min(1, bootProgress * 1.25);
           macScreenMat.emissiveIntensity = awake;
@@ -1244,7 +1681,6 @@ window.TSB3D = (() => {
         }
         screenLight.intensity = Math.min(1, bootProgress) * 2.0;
 
-        computeLaptopZoomTarget();
         const ez = 1 - Math.pow(1 - zoomProgress, 3);
         camera.position.lerpVectors(HOME_POS, targetCamPos, ez);
         curLook.lerpVectors(HOME_LOOK, targetLookAt, ez);
@@ -1255,23 +1691,26 @@ window.TSB3D = (() => {
           camera.position.copy(targetCamPos);
           curLook.copy(targetLookAt);
           camera.lookAt(curLook);
+          if (realScreenMesh) realScreenMesh.material = screenOpenMat;
+          updateScreenOS(1, false);
         }
       } else if (camMode === 'open') {
-        paintScreenOS(1);
-        if (macScreenMat) {
-          macScreenMat.emissiveIntensity = 1.0;
-          macScreenMat.envMapIntensity = 0.0;
-          macScreenMat.clearcoat = 0.0;
-          macScreenMat.specularIntensity = 0.0;
+        if (realScreenMesh && realScreenMesh.material !== screenOpenMat) {
+          realScreenMesh.material = screenOpenMat;
         }
-        computeLaptopZoomTarget();
-        camera.position.lerp(targetCamPos, 0.25);
-        curLook.lerp(targetLookAt, 0.25);
-        camera.lookAt(curLook);
+        updateScreenOS(1, false);
+        if (camera.position.distanceToSquared(targetCamPos) > 1e-6) {
+          camera.position.lerp(targetCamPos, 0.25);
+          curLook.lerp(targetLookAt, 0.25);
+          camera.lookAt(curLook);
+        }
       } else if (camMode === 'returning') {
+        if (realScreenMesh && macScreenMat && realScreenMesh.material !== macScreenMat) {
+          realScreenMesh.material = macScreenMat;
+        }
         bootProgress = Math.max(0, bootProgress - dt * 1.55);
         zoomProgress = Math.max(0, zoomProgress - dt * 1.45);
-        paintScreenOS(bootProgress);
+        updateScreenOS(bootProgress, true);
         if (macScreenMat) {
           const awake = Math.max(0, bootProgress);
           macScreenMat.emissiveIntensity = awake;
@@ -1281,7 +1720,6 @@ window.TSB3D = (() => {
         }
         screenLight.intensity = Math.max(0, bootProgress) * 2.0;
 
-        computeLaptopZoomTarget();
         const ez = 1 - Math.pow(1 - zoomProgress, 3);
         camera.position.lerpVectors(HOME_POS, targetCamPos, ez);
         curLook.lerpVectors(HOME_LOOK, targetLookAt, ez);
@@ -1289,7 +1727,7 @@ window.TSB3D = (() => {
 
         if (zoomProgress <= 0.01 && bootProgress <= 0.005) {
           camMode = 'desk';
-          paintScreenOS(0);
+          updateScreenOS(0, false);
           if (macScreenMat) {
             macScreenMat.emissiveIntensity = 0;
             macScreenMat.envMapIntensity = 0.85;
@@ -1308,7 +1746,9 @@ window.TSB3D = (() => {
       }
 
       const hovRank = hoveredIdx >= 0 ? bookGroups[hoveredIdx].rank : -1;
-      bookGroups.forEach((bg, idx) => {
+      let booksMoving = false;
+      for (let idx = 0; idx < bookGroups.length; idx++) {
+        const bg = bookGroups[idx];
         const isHov = idx === hoveredIdx;
         const isAbove = hovRank >= 0 && bg.rank > hovRank;
         const tX = isHov ? bg.baseX + 0.14 : bg.baseX;
@@ -1317,15 +1757,22 @@ window.TSB3D = (() => {
         const tRX = isHov ? 0.16 : 0;
         const tRY = isHov ? bg.baseRotY + 0.16 : bg.baseRotY;
 
-        bg.curX += (tX - bg.curX) * 0.11;
-        bg.curY += (tY - bg.curY) * 0.11;
-        bg.curZ += (tZ - bg.curZ) * 0.11;
-        bg.curRotX += (tRX - bg.curRotX) * 0.11;
-        bg.curRotY += (tRY - bg.curRotY) * 0.11;
-
-        bg.group.position.set(bg.curX, bg.curY, bg.curZ);
-        bg.group.rotation.set(bg.curRotX, bg.curRotY, 0);
-      });
+        const dx = tX - bg.curX, dy = tY - bg.curY, dz = tZ - bg.curZ;
+        const drx = tRX - bg.curRotX, dry = tRY - bg.curRotY;
+        if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) + Math.abs(drx) + Math.abs(dry) > 0.0008) {
+          bg.curX += dx * 0.11;
+          bg.curY += dy * 0.11;
+          bg.curZ += dz * 0.11;
+          bg.curRotX += drx * 0.11;
+          bg.curRotY += dry * 0.11;
+          bg.group.position.set(bg.curX, bg.curY, bg.curZ);
+          bg.group.rotation.set(bg.curRotX, bg.curRotY, 0);
+          booksMoving = true;
+        }
+      }
+      if (booksMoving && camMode !== 'open') {
+        renderer.shadowMap.needsUpdate = true;
+      }
 
       renderer.render(scene, camera);
     }
@@ -1342,119 +1789,99 @@ window.TSB3D = (() => {
   }
   /* ==================== 3. CONCEPTUAL POINT-CLOUD 3D BRAIN (OASIS-1 MRI + ATTENTION MIL) ==================== */
   function createBrain3D(canvas, onSliceUpdate) {
-    if (typeof THREE === 'undefined' || !canvas) return { setSlice() {}, setAuto() {}, dispose() {} };
+    if (typeof THREE === 'undefined' || !canvas) return { setSlice() {}, setAuto() {}, renderFrame() { return false; }, dispose() {} };
 
+    const isShared = Boolean(canvas.sharedRenderer && canvas.renderTarget);
+    const isOffscreen = isShared || !canvas.isConnected;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 40);
     camera.position.set(0, 0.75, 5.1); camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    let renderer = null;
+    if (!isShared) {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
+    }
+
+    const brainUniforms = {
+      uTime: { value: 0 },
+      uSliceY: { value: 0.204 },
+      uHippoBoost: { value: 1.0 },
+      uPointScale: { value: (canvas.height || 796) * 0.5 },
+      uColorAmber: { value: new THREE.Color(0xd99b58) },
+      uColorSlice: { value: new THREE.Color(0xe05336) }
+    };
 
     function resize() {
-      const w = canvas.clientWidth || canvas.width || 960, h = canvas.clientHeight || canvas.height || 760;
-      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+      const w = isShared ? canvas.width : (canvas.clientWidth || canvas.width || 960);
+      const h = isShared ? canvas.height : (canvas.clientHeight || canvas.height || 760);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      if (renderer) {
+        renderer.setSize(w, h, false);
+        brainUniforms.uPointScale.value = h * renderer.getPixelRatio() * 0.5;
+      } else {
+        brainUniforms.uPointScale.value = h * 0.5;
+      }
     }
-    resize(); window.addEventListener('resize', resize);
+    resize(); if (!isOffscreen) window.addEventListener('resize', resize);
 
     const brainRoot = new THREE.Group();
     scene.add(brainRoot);
 
-    // High-density anatomical cortical point cloud (2 hemispheres with gyri/sulci + cerebellum + brainstem + hippocampi)
-    const ptsList = [];
-    const baseColors = [];
-    const isHippo = [];
-
-    const cCortex = new THREE.Color(0xcfc7ba);
-    const cDeep = new THREE.Color(0x6d675f);
-    const cSliceHi = new THREE.Color(0xe05336);
-    const cAmber = new THREE.Color(0xd99b58);
-
-    function sampleHemisphere(side, count) {
-      for (let i = 0; i < count; i++) {
-        const phi = Math.acos(1 - 2 * ((i + 0.5) / count));
-        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-        let x = Math.sin(phi) * Math.cos(theta);
-        let y = Math.cos(phi);
-        let z = Math.sin(phi) * Math.sin(theta);
-
-        if (x * side < 0) x *= 0.14;
-        x *= 0.92; y *= 0.98; z *= 1.48;
-        const tempBulge = Math.exp(-Math.pow((y + 0.28) * 2.4, 2) - Math.pow((z - 0.12) * 1.5, 2)) * 0.22;
-        x += side * tempBulge * (x * side > 0 ? 1 : 0);
-        if (z > 0) x *= 1.0 - z * 0.14;
-        if (y < -0.35) y += 0.16 * Math.exp(-z * z * 0.9);
-
-        const g = ridgeFBM(x * 2.5 + side * 0.35, y * 2.5, z * 2.5);
-        const fold = (g - 0.42) * 0.165;
-        const len = Math.hypot(x, y, z) || 1;
-        x += (x / len) * fold + side * 0.11;
-        y += (y / len) * fold + 0.14;
-        z += (z / len) * fold;
-
-        ptsList.push(x, y, z);
-        const col = cDeep.clone().lerp(cCortex, Math.max(0, Math.min(1, g * 1.2)));
-        baseColors.push(col.r, col.g, col.b);
-        isHippo.push(0);
-      }
-    }
-
-    sampleHemisphere(-1, 2400);
-    sampleHemisphere(1, 2400);
-
-    // Cerebellum point cloud
-    for (let i = 0; i < 750; i++) {
-      const phi = Math.acos(1 - 2 * ((i + 0.5) / 750));
-      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-      const x = Math.sin(phi) * Math.cos(theta) * 0.68;
-      const y = Math.cos(phi) * 0.38 - 0.56;
-      const z = Math.sin(phi) * Math.sin(theta) * 0.46 - 0.82;
-      ptsList.push(x, y + Math.sin(y * 34) * 0.02, z);
-      baseColors.push(0.62, 0.58, 0.54);
-      isHippo.push(0);
-    }
-
-    // Brainstem points
-    for (let i = 0; i < 240; i++) {
-      const a = (i / 240) * Math.PI * 24;
-      const u = i / 240;
-      const r = 0.13 + (1 - u) * 0.05;
-      ptsList.push(Math.cos(a) * r, -1.24 + u * 0.86, Math.sin(a) * r - 0.32 + u * 0.12);
-      baseColors.push(0.55, 0.52, 0.49);
-      isHippo.push(0);
-    }
-
-    // Internal Hippocampi point clusters (Attention MIL focal zones)
-    [-1, 1].forEach((side) => {
-      for (let i = 0; i < 220; i++) {
-        const u = (i / 220) * Math.PI * 1.15;
-        const jitter = 0.045;
-        const x = side * (0.34 + Math.cos(u) * 0.14) + (Math.random() - 0.5) * jitter;
-        const y = -0.04 + Math.sin(u) * 0.18 + (Math.random() - 0.5) * jitter;
-        const z = -0.08 + (u / Math.PI - 0.5) * 0.42 + (Math.random() - 0.5) * jitter;
-        ptsList.push(x, y, z);
-        baseColors.push(cAmber.r, cAmber.g, cAmber.b);
-        isHippo.push(1);
-      }
-    });
-
-    const totalPts = ptsList.length / 3;
-    const basePosArr = new Float32Array(ptsList);
-    const posArr = new Float32Array(ptsList);
-    const colArr = new Float32Array(baseColors);
-    const baseColArr = new Float32Array(baseColors);
-    const phases = new Float32Array(totalPts);
-    for (let i = 0; i < totalPts; i++) {
-      phases[i] = (basePosArr[i * 3] * 2.7 + basePosArr[i * 3 + 1] * 3.1 + basePosArr[i * 3 + 2] * 2.3);
-    }
-
+    const { basePosArr, baseColArr, isHippoArr, phases } = getBrainPointCloudData();
     const bGeo = new THREE.BufferGeometry();
-    bGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
-    bGeo.setAttribute('color', new THREE.BufferAttribute(colArr, 3));
-    const brainCloud = new THREE.Points(
-      bGeo,
-      new THREE.PointsMaterial({ size: 0.042, vertexColors: true, transparent: true, opacity: 0.92, depthWrite: false })
-    );
+    bGeo.setAttribute('position', new THREE.BufferAttribute(basePosArr, 3));
+    bGeo.setAttribute('aColor', new THREE.BufferAttribute(baseColArr, 3));
+    bGeo.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+    bGeo.setAttribute('aIsHippo', new THREE.BufferAttribute(isHippoArr, 1));
+
+    const brainMat = new THREE.ShaderMaterial({
+      uniforms: brainUniforms,
+      vertexShader: `
+        attribute vec3 aColor;
+        attribute float aPhase;
+        attribute float aIsHippo;
+        uniform float uTime;
+        uniform float uSliceY;
+        uniform float uHippoBoost;
+        uniform float uPointScale;
+        uniform vec3 uColorAmber;
+        uniform vec3 uColorSlice;
+        varying vec3 vColor;
+        void main() {
+          float breath = 1.0 + sin(uTime * 1.15) * 0.016;
+          vec3 p = position * breath + vec3(
+            sin(uTime * 1.9 + aPhase) * 0.014,
+            cos(uTime * 1.35 + aPhase * 0.7) * 0.011,
+            sin(uTime * 1.6 - aPhase * 0.8) * 0.012
+          );
+          float distSlice = abs(p.y - uSliceY);
+          if (aIsHippo > 0.5) {
+            float pulse = 0.75 + 0.25 * sin(uTime * 3.4 + aPhase);
+            vColor = mix(uColorAmber, uColorSlice, uHippoBoost) * pulse;
+          } else if (distSlice < 0.095) {
+            float f = 1.0 - distSlice / 0.095;
+            vColor = mix(aColor, uColorSlice, f);
+          } else {
+            float syn = 0.82 + 0.14 * sin(uTime * 2.2 + aPhase);
+            vColor = aColor * syn;
+          }
+          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+          gl_PointSize = 0.042 * (uPointScale / max(0.1, -mvPosition.z));
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          gl_FragColor = vec4(vColor, 0.92);
+          #include <colorspace_fragment>
+        }
+      `,
+      transparent: true,
+      depthWrite: false
+    });
+    const brainCloud = new THREE.Points(bGeo, brainMat);
     brainRoot.add(brainCloud);
 
     // Dotted Axial Slice Ring (100% points, zero solid planes!)
@@ -1468,10 +1895,8 @@ window.TSB3D = (() => {
     }
     const rGeo = new THREE.BufferGeometry();
     rGeo.setAttribute('position', new THREE.BufferAttribute(ringPos, 3));
-    const sliceRing = new THREE.Points(
-      rGeo,
-      new THREE.PointsMaterial({ color: 0xe05336, size: 0.045, transparent: true, opacity: 0.85, depthWrite: false })
-    );
+    const rMat = new THREE.PointsMaterial({ color: 0xe05336, size: 0.045, transparent: true, opacity: 0.85, depthWrite: false });
+    const sliceRing = new THREE.Points(rGeo, rMat);
     brainRoot.add(sliceRing);
 
     let slice = 132, autoScan = true;
@@ -1480,90 +1905,78 @@ window.TSB3D = (() => {
     const attnWeight = (s) => 0.006 + 0.054 * Math.exp(-Math.pow((s - 132) / 9.2, 2));
 
     let rafId = null;
+    let lastReportedSlice = -1;
     const clock = new THREE.Clock();
-    function animate() {
-      rafId = requestAnimationFrame(animate);
+    function renderFrame() {
       const t = clock.getElapsedTime();
       if (autoScan) slice = 100 + Math.round(((Math.sin(t * 0.7) + 1) * 0.5) * 60);
 
       const sliceY = -0.82 + ((slice - 100) / 60) * 1.92;
       sliceRing.position.y = sliceY;
       const wAttn = attnWeight(slice);
-      const hippoBoost = Math.min(1, wAttn / 0.055);
+      brainUniforms.uTime.value = t;
+      brainUniforms.uSliceY.value = sliceY;
+      brainUniforms.uHippoBoost.value = Math.min(1, wAttn / 0.055);
 
-      // Organic living point-cloud breathing + subtle cortical ripple + slice highlighting
-      const pAttr = bGeo.attributes.position;
-      const pa = pAttr.array;
-      const cAttr = bGeo.attributes.color;
-      const ca = cAttr.array;
-      const breath = 1.0 + Math.sin(t * 1.15) * 0.016;
-      for (let i = 0; i < totalPts; i++) {
-        const ix = i * 3;
-        const bx = basePosArr[ix], by = basePosArr[ix + 1], bz = basePosArr[ix + 2];
-        const ph = phases[i];
-        const wave = Math.sin(t * 1.9 + ph) * 0.014;
-        const drift = Math.cos(t * 1.35 + ph * 0.7) * 0.011;
-        const px = bx * breath + wave;
-        const py = by * breath + drift;
-        const pz = bz * breath + Math.sin(t * 1.6 - ph * 0.8) * 0.012;
-        pa[ix] = px; pa[ix + 1] = py; pa[ix + 2] = pz;
-
-        const distSlice = Math.abs(py - sliceY);
-        if (isHippo[i]) {
-          const pulse = 0.75 + 0.25 * Math.sin(t * 3.4 + ph);
-          ca[ix] = (cAmber.r + (cSliceHi.r - cAmber.r) * hippoBoost) * pulse;
-          ca[ix + 1] = (cAmber.g + (cSliceHi.g - cAmber.g) * hippoBoost) * pulse;
-          ca[ix + 2] = (cAmber.b + (cSliceHi.b - cAmber.b) * hippoBoost) * pulse;
-        } else if (distSlice < 0.095) {
-          const f = 1 - distSlice / 0.095;
-          ca[ix] = baseColArr[ix] + (cSliceHi.r - baseColArr[ix]) * f;
-          ca[ix + 1] = baseColArr[ix + 1] + (cSliceHi.g - baseColArr[ix + 1]) * f;
-          ca[ix + 2] = baseColArr[ix + 2] + (cSliceHi.b - baseColArr[ix + 2]) * f;
-        } else {
-          const syn = 0.82 + 0.14 * Math.sin(t * 2.2 + ph);
-          ca[ix] = baseColArr[ix] * syn;
-          ca[ix + 1] = baseColArr[ix + 1] * syn;
-          ca[ix + 2] = baseColArr[ix + 2] * syn;
-        }
+      if (onSliceUpdate && slice !== lastReportedSlice) {
+        lastReportedSlice = slice;
+        onSliceUpdate(slice, wAttn);
       }
-      pAttr.needsUpdate = true;
-      cAttr.needsUpdate = true;
-
-      if (onSliceUpdate) onSliceUpdate(slice, wAttn);
       if (!isDragging()) { state.vy *= 0.92; state.vx *= 0.92; state.ry += state.vy + 0.0042; state.rx += state.vx; }
       brainRoot.rotation.set(state.rx, state.ry, 0);
-      renderer.render(scene, camera);
+      if (isShared) {
+        renderDemoToRT(canvas.sharedRenderer, canvas.renderTarget, scene, camera, canvas.getClearColor(), 1, false);
+      } else {
+        renderer.render(scene, camera);
+      }
+      return true;
     }
-    animate();
+    if (!isOffscreen) {
+      const animate = () => { rafId = requestAnimationFrame(animate); renderFrame(); };
+      animate();
+    }
 
     return {
       setSlice(s) { autoScan = false; slice = s; },
       setAuto(v) { autoScan = v; },
-      dispose() { if (rafId) cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); renderer.dispose(); }
+      renderFrame,
+      dispose() {
+        if (rafId) cancelAnimationFrame(rafId);
+        if (!isOffscreen) window.removeEventListener('resize', resize);
+        bGeo.dispose(); brainMat.dispose(); rGeo.dispose(); rMat.dispose();
+        if (renderer) renderer.dispose();
+      }
     };
   }
 
   /* ==================== 4. ANKI 3D: PURE TACTILE FIELDNOTE PAPER FLASHCARD DECK (ZERO RINGS/CHAINS!) ==================== */
   function createAnki3D(canvas, getLang, onCardChange) {
-    if (typeof THREE === 'undefined' || !canvas) return { flipCard() {}, nextCard() {}, dispose() {} };
+    if (typeof THREE === 'undefined' || !canvas) return { flipCard() {}, nextCard() {}, renderFrame() { return false; }, dispose() {} };
 
+    const isShared = Boolean(canvas.sharedRenderer && canvas.renderTarget);
+    const isOffscreen = isShared || !canvas.isConnected;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 40);
     camera.position.set(0, 0.35, 4.75);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    let renderer = null;
+    if (!isShared) {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.08;
+    }
 
     function resize() {
-      const w = canvas.clientWidth || canvas.width || 960, h = canvas.clientHeight || canvas.height || 760;
-      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+      const w = isShared ? canvas.width : (canvas.clientWidth || canvas.width || 960);
+      const h = isShared ? canvas.height : (canvas.clientHeight || canvas.height || 760);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      if (renderer) renderer.setSize(w, h, false);
     }
-    resize(); window.addEventListener('resize', resize);
+    resize(); if (!isOffscreen) window.addEventListener('resize', resize);
 
     // Warm desk lamp lighting for realistic paper stock feel
     scene.add(new THREE.AmbientLight(0xfff5e8, 0.68));
@@ -1777,9 +2190,9 @@ window.TSB3D = (() => {
     const isDragging = attachOrbit(canvas, state, () => { flipped = !flipped; });
 
     let rafId = null;
+    let shadowPrimed = false;
     const clock = new THREE.Clock();
-    function animate() {
-      rafId = requestAnimationFrame(animate);
+    function renderFrame() {
       const t = clock.getElapsedTime();
 
       let slideArc = 0;
@@ -1793,7 +2206,8 @@ window.TSB3D = (() => {
         topCard.rotation.z *= 0.85;
       }
 
-      flipAngle += ((flipped ? Math.PI : 0) - flipAngle) * 0.11;
+      const targetFlip = flipped ? Math.PI : 0;
+      flipAngle += (targetFlip - flipAngle) * 0.11;
       topCard.rotation.y = flipAngle;
       // Full geometric clearance: half-width is 1.39, so lifting by sin(angle) * 1.54 guarantees ZERO clipping with the deck underneath (even during card swap from verso)!
       const clearance = Math.sin(Math.min(Math.PI, Math.abs(flipAngle))) * 1.54;
@@ -1806,9 +2220,19 @@ window.TSB3D = (() => {
         state.rx += (0.1 - state.rx) * 0.03 + state.vx;
       }
       root.rotation.set(state.rx, state.ry, 0);
-      renderer.render(scene, camera);
+      if (isShared) {
+        const needsShadow = !shadowPrimed || slidePhase > 0 || Math.abs(targetFlip - flipAngle) > 0.004 || isDragging();
+        shadowPrimed = true;
+        renderDemoToRT(canvas.sharedRenderer, canvas.renderTarget, scene, camera, 0x000000, 0, needsShadow);
+      } else {
+        renderer.render(scene, camera);
+      }
+      return true;
     }
-    animate();
+    if (!isOffscreen) {
+      const animate = () => { rafId = requestAnimationFrame(animate); renderFrame(); };
+      animate();
+    }
 
     return {
       flipCard() { flipped = !flipped; },
@@ -1817,26 +2241,54 @@ window.TSB3D = (() => {
         flipped = false;
         setTimeout(() => { cardIdx = (cardIdx + 1) % 5; loadCard(); }, 180);
       },
-      dispose() { if (rafId) cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); renderer.dispose(); }
+      renderFrame,
+      dispose() {
+        if (rafId) cancelAnimationFrame(rafId);
+        if (!isOffscreen) window.removeEventListener('resize', resize);
+        if (frontMat.map) frontMat.map.dispose();
+        if (backMat.map) backMat.map.dispose();
+        paperBump.dispose();
+        frontMat.dispose(); backMat.dispose(); stackCardMat.dispose(); stackEdgeMat.dispose();
+        root.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+        if (deskSpot.shadow?.map) deskSpot.shadow.map.dispose();
+        if (renderer) renderer.dispose();
+      }
     };
   }
 
   /* ==================== 5. CHURN MLOPS: CONCEPTUAL MORPHING POINT-CLOUD (K8S CLUSTER <-> XGBOOST TREE & LANDSCAPE) ==================== */
   function createChurn3D(canvas, onViewChange, onRuleChange) {
-    if (typeof THREE === 'undefined' || !canvas) return { setParams() {}, toggleView() {}, dispose() {} };
+    if (typeof THREE === 'undefined' || !canvas) return { setParams() {}, toggleView() {}, renderFrame() { return false; }, dispose() {} };
 
+    const isShared = Boolean(canvas.sharedRenderer && canvas.renderTarget);
+    const isOffscreen = isShared || !canvas.isConnected;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 45);
     camera.position.set(0, 1.55, 6.2); camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    let renderer = null;
+    if (!isShared) {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
+    }
+
+    const churnUniforms = {
+      uMorph: { value: 0.0 },
+      uPointScale: { value: (canvas.height || 796) * 0.5 }
+    };
 
     function resize() {
-      const w = canvas.clientWidth || canvas.width || 960, h = canvas.clientHeight || canvas.height || 760;
-      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+      const w = isShared ? canvas.width : (canvas.clientWidth || canvas.width || 960);
+      const h = isShared ? canvas.height : (canvas.clientHeight || canvas.height || 760);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      if (renderer) {
+        renderer.setSize(w, h, false);
+        churnUniforms.uPointScale.value = h * renderer.getPixelRatio() * 0.5;
+      } else {
+        churnUniforms.uPointScale.value = h * 0.5;
+      }
     }
-    resize(); window.addEventListener('resize', resize);
+    resize(); if (!isOffscreen) window.addEventListener('resize', resize);
 
     const root = new THREE.Group();
     scene.add(root);
@@ -1968,23 +2420,56 @@ window.TSB3D = (() => {
     const leafRanges = [[3320, 3390, cAmber], [3390, 3460, cRed], [3460, 3530, cSage], [3530, 3600, cRed]];
     leafRanges.forEach(([s, e, col], li) => fillSpherePts(posAlgo, colAlgo, s, e - s, leaves[li].x, leaves[li].y, leaves[li].z, 0.18, col));
 
-    // Init current state = Cluster
-    curPos.set(posCluster); curCol.set(colCluster);
+    // GPU morphing point-cloud (0 CPU loop iterations per frame!)
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(curPos, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(curCol, 3));
-    const cloud = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.046, vertexColors: true, transparent: true, opacity: 0.92, depthWrite: false }));
+    geo.setAttribute('position', new THREE.BufferAttribute(posCluster, 3));
+    geo.setAttribute('aPosAlgo', new THREE.BufferAttribute(posAlgo, 3));
+    geo.setAttribute('aColCluster', new THREE.BufferAttribute(colCluster, 3));
+    const colAlgoAttr = new THREE.BufferAttribute(colAlgo, 3);
+    geo.setAttribute('aColAlgo', colAlgoAttr);
+    const cloudMat = new THREE.ShaderMaterial({
+      uniforms: churnUniforms,
+      vertexShader: `
+        attribute vec3 aPosAlgo;
+        attribute vec3 aColCluster;
+        attribute vec3 aColAlgo;
+        uniform float uMorph;
+        uniform float uPointScale;
+        varying vec3 vColor;
+        void main() {
+          vec3 p = mix(position, aPosAlgo, uMorph);
+          vColor = mix(aColCluster, aColAlgo, uMorph);
+          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+          gl_PointSize = 0.046 * (uPointScale / max(0.1, -mvPosition.z));
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          gl_FragColor = vec4(vColor, 0.92);
+          #include <colorspace_fragment>
+        }
+      `,
+      transparent: true,
+      depthWrite: false
+    });
+    const cloud = new THREE.Points(geo, cloudMat);
     root.add(cloud);
 
     // Subtle glowing marker point (request in cluster / active customer in algo)
-    const activeDot = new THREE.Mesh(new THREE.SphereGeometry(0.085, 14, 14), new THREE.MeshBasicMaterial({ color: 0xf4efe4 }));
+    const activeDotGeo = new THREE.SphereGeometry(0.085, 14, 14);
+    const activeDotMat = new THREE.MeshBasicMaterial({ color: 0xf4efe4 });
+    const activeDot = new THREE.Mesh(activeDotGeo, activeDotMat);
     root.add(activeDot);
 
     // Invisible hitbox on center FastAPI+XGB pod
-    const centerHit = new THREE.Mesh(new THREE.BoxGeometry(1.45, 1.3, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
+    const centerHitGeo = new THREE.BoxGeometry(1.45, 1.3, 1.2);
+    const centerHitMat = new THREE.MeshBasicMaterial({ visible: false });
+    const centerHit = new THREE.Mesh(centerHitGeo, centerHitMat);
     root.add(centerHit);
 
-    let mode = 'cluster', tenure = 24, tickets = 1, flow = 0, lastCycle = -1;
+    let mode = 'cluster', morphT = 0, tenure = 24, tickets = 1, flow = 0, lastCycle = -1;
 
     function refreshAlgoColors() {
       const shortTen = tenure < 18;
@@ -1999,6 +2484,7 @@ window.TSB3D = (() => {
           colAlgo[i * 3] = col.r * dim; colAlgo[i * 3 + 1] = col.g * dim; colAlgo[i * 3 + 2] = col.b * dim;
         }
       });
+      colAlgoAttr.needsUpdate = true;
 
       if (onRuleChange) {
         const ruleStr = shortTen
@@ -2023,7 +2509,7 @@ window.TSB3D = (() => {
         if (typeof e.normX === 'number') {
           ptr.x = e.normX * 2 - 1;
           ptr.y = -(e.normY * 2 - 1);
-        } else {
+        } else if (typeof canvas.getBoundingClientRect === 'function') {
           const r = canvas.getBoundingClientRect();
           ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
           ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
@@ -2036,33 +2522,26 @@ window.TSB3D = (() => {
       }
     });
 
-    canvas.addEventListener('pointermove', (e) => {
-      if (mode !== 'cluster') { canvas.style.cursor = 'grab'; return; }
-      const r = canvas.getBoundingClientRect();
-      ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-      raycaster.setFromCamera(ptr, camera);
-      canvas.style.cursor = raycaster.intersectObject(centerHit, false).length > 0 ? 'pointer' : 'grab';
-    });
+    if (typeof canvas.addEventListener === 'function') {
+      canvas.addEventListener('pointermove', (e) => {
+        if (mode !== 'cluster') { canvas.style.cursor = 'grab'; return; }
+        const r = canvas.getBoundingClientRect();
+        ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+        ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+        raycaster.setFromCamera(ptr, camera);
+        canvas.style.cursor = raycaster.intersectObject(centerHit, false).length > 0 ? 'pointer' : 'grab';
+      });
+    }
 
     let rafId = null;
     const clock = new THREE.Clock();
-    function animate() {
-      rafId = requestAnimationFrame(animate);
+    function renderFrame() {
       const t = clock.getElapsedTime();
       flow = (flow + 0.008) % 1;
 
-      const tPos = mode === 'cluster' ? posCluster : posAlgo;
-      const tCol = mode === 'cluster' ? colCluster : colAlgo;
-      const pAttr = geo.attributes.position, cAttr = geo.attributes.color;
-      const pa = pAttr.array, ca = cAttr.array;
-
-      // Fluid point-cloud morphing between Kubernetes cluster & XGBoost algorithm!
-      for (let i = 0; i < N * 3; i++) {
-        pa[i] += (tPos[i] - pa[i]) * 0.085;
-        ca[i] += (tCol[i] - ca[i]) * 0.09;
-      }
-      pAttr.needsUpdate = true; cAttr.needsUpdate = true;
+      const targetMorph = mode === 'cluster' ? 0.0 : 1.0;
+      morphT += (targetMorph - morphT) * 0.085;
+      churnUniforms.uMorph.value = morphT;
 
       if (mode === 'cluster') {
         activeDot.visible = true;
@@ -2072,7 +2551,6 @@ window.TSB3D = (() => {
         activeDot.scale.setScalar(0.85);
       } else {
         activeDot.visible = false;
-        // Gently cycle through XGBoost decision branches every 2.8s so the tree lives organically
         const cycle = Math.floor(t / 2.8) % 4;
         if (cycle !== lastCycle) {
           lastCycle = cycle;
@@ -2088,30 +2566,63 @@ window.TSB3D = (() => {
         state.rx += state.vx;
       }
       root.rotation.set(state.rx, state.ry, 0);
-      renderer.render(scene, camera);
+      if (isShared) {
+        renderDemoToRT(canvas.sharedRenderer, canvas.renderTarget, scene, camera, canvas.getClearColor(), 1, false);
+      } else {
+        renderer.render(scene, camera);
+      }
+      return true;
     }
-    animate();
+    if (!isOffscreen) {
+      const animate = () => { rafId = requestAnimationFrame(animate); renderFrame(); };
+      animate();
+    }
 
     return {
       setParams(ten, tkt) { tenure = ten; tickets = tkt; refreshAlgoColors(); },
       toggleView() { setView(mode === 'cluster' ? 'algo' : 'cluster'); },
-      dispose() { if (rafId) cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); renderer.dispose(); }
+      renderFrame,
+      dispose() {
+        if (rafId) cancelAnimationFrame(rafId);
+        if (!isOffscreen) window.removeEventListener('resize', resize);
+        geo.dispose(); cloudMat.dispose();
+        activeDotGeo.dispose(); activeDotMat.dispose();
+        centerHitGeo.dispose(); centerHitMat.dispose();
+        if (renderer) renderer.dispose();
+      }
     };
   }
 
   /* ==================== 6. PARKINSON MDS-UPDRS: PURE CONCEPTUAL POINT-CLOUD REGRESSION MANIFOLD ==================== */
   function createBobslay3D(canvas) {
-    if (typeof THREE === 'undefined' || !canvas) return { setMode() {}, dispose() {} };
+    if (typeof THREE === 'undefined' || !canvas) return { setMode() {}, renderFrame() { return false; }, dispose() {} };
+    const isShared = Boolean(canvas.sharedRenderer && canvas.renderTarget);
+    const isOffscreen = isShared || !canvas.isConnected;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 40);
     camera.position.set(3.1, 2.2, 4.3); camera.lookAt(0, 0, 0);
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    function resize() {
-      const w = canvas.clientWidth || canvas.width || 960, h = canvas.clientHeight || canvas.height || 760;
-      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+
+    let renderer = null;
+    if (!isShared) {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
     }
-    resize(); window.addEventListener('resize', resize);
+    const bobUniforms = {
+      uMorph: { value: 1.0 },
+      uPointScale: { value: (canvas.height || 796) * 0.5 }
+    };
+    function resize() {
+      const w = isShared ? canvas.width : (canvas.clientWidth || canvas.width || 960);
+      const h = isShared ? canvas.height : (canvas.clientHeight || canvas.height || 760);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      if (renderer) {
+        renderer.setSize(w, h, false);
+        bobUniforms.uPointScale.value = h * renderer.getPixelRatio() * 0.5;
+      } else {
+        bobUniforms.uPointScale.value = h * 0.5;
+      }
+    }
+    resize(); if (!isOffscreen) window.addEventListener('resize', resize);
 
     const root = new THREE.Group(); scene.add(root);
 
@@ -2130,11 +2641,12 @@ window.TSB3D = (() => {
     }
     const mGeo = new THREE.BufferGeometry();
     mGeo.setAttribute('position', new THREE.BufferAttribute(mPos, 3));
-    root.add(new THREE.Points(mGeo, new THREE.PointsMaterial({ color: 0xa39c90, size: 0.028, transparent: true, opacity: 0.45, depthWrite: false })));
+    const mMat = new THREE.PointsMaterial({ color: 0xa39c90, size: 0.028, transparent: true, opacity: 0.45, depthWrite: false });
+    root.add(new THREE.Points(mGeo, mMat));
 
-    // 2. 520 Patient-Grouped Points morphing between Raw Biased & Debiased OFF MDS-UPDRS
+    // 2. 520 Patient-Grouped Points morphing on GPU between Raw Biased & Debiased OFF MDS-UPDRS
     const N = 520;
-    const rawPos = new Float32Array(N * 3), fixPos = new Float32Array(N * 3), curPos = new Float32Array(N * 3), colors = new Float32Array(N * 3);
+    const rawPos = new Float32Array(N * 3), fixPos = new Float32Array(N * 3), colors = new Float32Array(N * 3);
     const c1 = new THREE.Color(0x5ea8cc), c2 = new THREE.Color(0xe05336), c3 = new THREE.Color(0xd99b58);
     for (let i = 0; i < N; i++) {
       const s1 = Math.sin(i * 12.9898) * 43758.5453; const r1 = s1 - Math.floor(s1);
@@ -2144,35 +2656,78 @@ window.TSB3D = (() => {
       const idealY = Math.max(-1.05, Math.min(1.05, x * 0.48 + z * 0.28));
       rawPos[i * 3] = x; rawPos[i * 3 + 1] = Math.max(-1.15, Math.min(1.15, idealY * 0.7 + (r3 - 0.5) * 1.25)); rawPos[i * 3 + 2] = z;
       fixPos[i * 3] = x; fixPos[i * 3 + 1] = Math.max(-1.15, Math.min(1.15, idealY + (r3 - 0.5) * 0.18)); fixPos[i * 3 + 2] = z;
-      curPos[i * 3] = fixPos[i * 3]; curPos[i * 3 + 1] = fixPos[i * 3 + 1]; curPos[i * 3 + 2] = fixPos[i * 3 + 2];
       const col = i % 3 === 0 ? c1 : (i % 3 === 1 ? c2 : c3);
       colors[i * 3] = col.r; colors[i * 3 + 1] = col.g; colors[i * 3 + 2] = col.b;
     }
     const pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute('position', new THREE.BufferAttribute(curPos, 3));
-    pGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    root.add(new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.068, vertexColors: true, transparent: true, opacity: 0.92, depthWrite: false })));
+    pGeo.setAttribute('position', new THREE.BufferAttribute(fixPos, 3));
+    pGeo.setAttribute('aRawPos', new THREE.BufferAttribute(rawPos, 3));
+    pGeo.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+    const pMat = new THREE.ShaderMaterial({
+      uniforms: bobUniforms,
+      vertexShader: `
+        attribute vec3 aRawPos;
+        attribute vec3 aColor;
+        uniform float uMorph;
+        uniform float uPointScale;
+        varying vec3 vColor;
+        void main() {
+          vec3 p = mix(aRawPos, position, uMorph);
+          vColor = aColor;
+          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+          gl_PointSize = 0.068 * (uPointScale / max(0.1, -mvPosition.z));
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          gl_FragColor = vec4(vColor, 0.92);
+          #include <colorspace_fragment>
+        }
+      `,
+      transparent: true,
+      depthWrite: false
+    });
+    root.add(new THREE.Points(pGeo, pMat));
 
-    let debiased = true;
+    let debiased = true, morphT = 1.0;
     const state = { rx: 0.14, ry: 0.4, vx: 0, vy: 0 };
     const isDragging = attachOrbit(canvas, state, () => { debiased = !debiased; });
     let rafId = null;
-    function animate() {
-      rafId = requestAnimationFrame(animate);
-      const target = debiased ? fixPos : rawPos;
-      const arr = pGeo.attributes.position.array;
-      for (let i = 0; i < N * 3; i++) arr[i] += (target[i] - arr[i]) * 0.09;
-      pGeo.attributes.position.needsUpdate = true;
+    function renderFrame() {
+      const target = debiased ? 1.0 : 0.0;
+      morphT += (target - morphT) * 0.09;
+      bobUniforms.uMorph.value = morphT;
       if (!isDragging()) { state.vy *= 0.92; state.vx *= 0.92; state.ry += state.vy + 0.0038; state.rx += state.vx; }
       root.rotation.set(state.rx, state.ry, 0);
-      renderer.render(scene, camera);
+      if (isShared) {
+        renderDemoToRT(canvas.sharedRenderer, canvas.renderTarget, scene, camera, canvas.getClearColor(), 1, false);
+      } else {
+        renderer.render(scene, camera);
+      }
+      return true;
     }
-    animate();
-    return { setMode(isFix) { debiased = isFix; }, dispose() { if (rafId) cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); renderer.dispose(); } };
+    if (!isOffscreen) {
+      const animate = () => { rafId = requestAnimationFrame(animate); renderFrame(); };
+      animate();
+    }
+    return {
+      setMode(isFix) { debiased = isFix; },
+      renderFrame,
+      dispose() {
+        if (rafId) cancelAnimationFrame(rafId);
+        if (!isOffscreen) window.removeEventListener('resize', resize);
+        mGeo.dispose(); mMat.dispose(); pGeo.dispose(); pMat.dispose();
+        if (renderer) renderer.dispose();
+      }
+    };
   }
 
   /* ==================== 7. SRGAN HD 2D PIXEL COMPARATOR ==================== */
   function createSrganLab(canvas) {
+    const isOffscreen = !canvas.isConnected;
+    const baseW = canvas.width || 980, baseH = canvas.height || 796;
     const ctx = canvas.getContext('2d');
     const BASE = 16;
     function sampleRGB(u, v) {
@@ -2203,12 +2758,20 @@ window.TSB3D = (() => {
       g.putImageData(img, 0, 0); return off;
     }
     const grids = { 1: buildGrid(1), 2: buildGrid(2), 4: buildGrid(4) };
-    let scale = 4, split = 0.58, rafId = null;
+    let scale = 4, split = 0.58, rafId = null, dirty = true;
 
-    canvas.addEventListener('pointermove', (e) => {
-      if (e.buttons !== 1 && e.pointerType === 'mouse') return;
+    const updateSplitFromEvent = (e) => {
       const r = canvas.getBoundingClientRect();
       split = Math.max(0.05, Math.min(0.95, 1 - (e.clientX - r.left) / r.width));
+      dirty = true;
+    };
+    canvas.addEventListener('pointerdown', (e) => {
+      try { canvas.setPointerCapture(e.pointerId); } catch {}
+      updateSplitFromEvent(e);
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (e.buttons !== 1 && e.pointerType === 'mouse') return;
+      updateSplitFromEvent(e);
     });
 
     function drawLayer(mult, x, y, dw, dh) {
@@ -2223,12 +2786,13 @@ window.TSB3D = (() => {
       ctx.stroke();
     }
 
-    function render() {
-      rafId = requestAnimationFrame(render);
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = canvas.clientWidth || canvas.width || 960, h = canvas.clientHeight || canvas.height || 760;
-      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
-        canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    function renderFrame() {
+      if (!dirty && isOffscreen) return false;
+      const dpr = isOffscreen ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+      const w = canvas.clientWidth || baseW, h = canvas.clientHeight || baseH;
+      const targetW = Math.round(w * dpr), targetH = Math.round(h * dpr);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW; canvas.height = targetH;
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -2247,9 +2811,19 @@ window.TSB3D = (() => {
       ctx.fillStyle = '#efeae0'; ctx.font = '600 11px "JetBrains Mono", monospace';
       ctx.fillText('LR ×1', x + 10, y + 20);
       ctx.textAlign = 'right'; ctx.fillText(`SRGAN ×${scale}`, x + dw - 10, y + 20); ctx.textAlign = 'left';
+      dirty = false;
+      return true;
     }
-    render();
-    return { setScale(s) { scale = s; }, setSplit(v) { split = v; }, dispose() { if (rafId) cancelAnimationFrame(rafId); } };
+    if (!isOffscreen) {
+      const loop = () => { rafId = requestAnimationFrame(loop); if (dirty) renderFrame(); };
+      loop();
+    }
+    return {
+      setScale(s) { scale = s; dirty = true; },
+      setSplit(v) { split = v; dirty = true; },
+      renderFrame,
+      dispose() { if (rafId) cancelAnimationFrame(rafId); }
+    };
   }
 
   return { createHeroScene, createBookshelf3D, createBrain3D, createAnki3D, createChurn3D, createBobslay3D, createSrganLab };

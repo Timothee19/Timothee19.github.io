@@ -325,6 +325,39 @@
 
   <div class="toast mono" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- ==================== MOBILE PROJECT WORKSPACE (SMARTPHONE <= 820px) ==================== -->
+  <div class="mobile-os-modal hidden" id="mobileOsModal" role="dialog" aria-modal="true" aria-labelledby="mOsTitle">
+    <div class="modal-top mono">
+      <div class="modal-crumb">
+        <span class="os-dot" aria-hidden="true"></span>
+        <span>TIMOTHEE.OS /</span>
+        <span id="mOsNum">01</span>
+      </div>
+      <div class="modal-nav">
+        <button type="button" class="tool-btn" id="mOsPrev" aria-label="Projet précédent">←</button>
+        <button type="button" class="tool-btn" id="mOsNext" aria-label="Projet suivant">→</button>
+        <button type="button" class="tool-btn tool-accent" id="mOsClose" data-i18n="drawer.back">← BUREAU</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stage-col">
+        <div class="stage-box" id="demoStage"></div>
+        <div class="stage-bar mono" id="demoControls"></div>
+      </div>
+      <div class="modal-info-col">
+        <span class="modal-date mono dim" id="mOsDate"></span>
+        <h3 class="modal-title" id="mOsTitle"></h3>
+        <p class="modal-desc" id="mOsDesc"></p>
+        <div class="modal-metrics" id="mOsMetrics"></div>
+        <div class="modal-stack mono" id="mOsStack"></div>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-solid modal-repo" id="mOsRepo">
+          <span data-i18n="drawer.repo">Voir le dépôt</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>

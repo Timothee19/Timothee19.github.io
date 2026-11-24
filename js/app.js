@@ -182,28 +182,49 @@
   };
 
   let mdMouseX = 0, mdMouseY = 0;
+  let mdCache = null;
+  let mdInView = true;
+  let mdLastP = -1;
 
-  function updateManifesto() {
+  function getMdCache() {
+    if (mdCache) return mdCache;
     const track = document.getElementById('about');
-    if (!track) return;
-    const topOffset = 58;
+    if (!track) return null;
+    mdCache = {
+      track,
+      fill: document.getElementById('mdProgressFill'),
+      marquee: document.getElementById('mdMarquee'),
+      scenes: Array.from(track.querySelectorAll('.md-scene')),
+      tabs: Array.from(document.querySelectorAll('#mdFilmTabs .md-ftab')),
+      portrait: document.getElementById('mdPortrait')
+    };
+    return mdCache;
+  }
+
+  function isMobileViewport() {
+    return window.innerWidth <= 820;
+  }
+
+  function updateManifesto(force = false) {
+    const c = getMdCache();
+    if (!c) return;
+    const topOffset = isMobileViewport() ? 54 : 58;
     const viewH = Math.max(1, window.innerHeight - topOffset);
-    const rect = track.getBoundingClientRect();
-    const scrollable = Math.max(1, track.offsetHeight - viewH);
+    const rect = c.track.getBoundingClientRect();
+    mdInView = rect.bottom >= -120 && rect.top <= window.innerHeight + 120;
+    if (!mdInView && !force) return;
+
+    const scrollable = Math.max(1, c.track.offsetHeight - viewH);
     const p = Math.max(0, Math.min(1, (topOffset - rect.top) / scrollable));
+    mdLastP = p;
 
-    const fill = document.getElementById('mdProgressFill');
-    if (fill) fill.style.width = `${(p * 100).toFixed(2)}%`;
+    if (c.fill) c.fill.style.width = `${(p * 100).toFixed(2)}%`;
+    if (c.marquee) c.marquee.style.transform = `translate3d(${(-p * 38).toFixed(2)}%, -50%, 0)`;
 
-    const marquee = document.getElementById('mdMarquee');
-    if (marquee) marquee.style.transform = `translate3d(${(-p * 38).toFixed(2)}%, -50%, 0)`;
-
-    const scenes = track.querySelectorAll('.md-scene');
-    const tabs = document.querySelectorAll('#mdFilmTabs .md-ftab');
     const continuousIdx = p * 3;
     const activeIdx = Math.round(continuousIdx);
 
-    scenes.forEach((sc, i) => {
+    c.scenes.forEach((sc, i) => {
       const dist = i - continuousIdx;
       const absD = Math.abs(dist);
       const norm = Math.max(0, Math.min(1, (absD - 0.24) / 0.38));
@@ -217,30 +238,101 @@
       sc.classList.toggle('is-current', i === activeIdx);
     });
 
-    tabs.forEach((tb, i) => tb.classList.toggle('active', i === activeIdx));
+    c.tabs.forEach((tb, i) => tb.classList.toggle('active', i === activeIdx));
 
-    const portrait = document.getElementById('mdPortrait');
-    if (portrait) {
+    if (c.portrait) {
       const px = mdMouseX * -10;
       const py = (0.5 - p) * 28 + mdMouseY * -8;
-      portrait.style.transform = `translate3d(${px.toFixed(1)}px, calc(-50% + ${py.toFixed(1)}px), 0)`;
+      c.portrait.style.transform = `translate3d(${px.toFixed(1)}px, calc(-50% + ${py.toFixed(1)}px), 0)`;
     }
   }
 
-  /* ==================== NATIVE 3D MACBOOK PRO SCREEN WORKSPACE (ZERO HTML OVERLAY!) ==================== */
+  function updateManifestoPortrait() {
+    if (!mdInView) return;
+    const c = getMdCache();
+    if (!c?.portrait) return;
+    const p = mdLastP < 0 ? 0 : mdLastP;
+    const px = mdMouseX * -10;
+    const py = (0.5 - p) * 28 + mdMouseY * -8;
+    c.portrait.style.transform = `translate3d(${px.toFixed(1)}px, calc(-50% + ${py.toFixed(1)}px), 0)`;
+  }
+
+  /* ==================== NATIVE 3D MACBOOK PRO SCREEN WORKSPACE (DESKTOP) + RESPONSIVE SHEET (SMARTPHONE) ==================== */
   let currentKey = null;
   let laptopOpen = false;
+  let mobileModalOpen = false;
 
   function focusDeskViewport() {
     const vp = document.getElementById('deskViewport');
     if (!vp) return;
     const rect = vp.getBoundingClientRect();
     const targetY = Math.max(0, window.scrollY + rect.top - Math.max(58, (window.innerHeight - rect.height) * 0.5));
+    if (Math.abs(targetY - window.scrollY) < 8) return;
     if (lenisInstance) lenisInstance.scrollTo(targetY, { duration: 0.55 });
     else window.scrollTo({ top: targetY, behavior: 'smooth' });
   }
 
+  function disposeActiveDemo() {
+    if (activeDemo?.dispose) activeDemo.dispose();
+    activeDemo = null;
+  }
+
+  function populateMobileModal(key) {
+    const d = PROJECTS[key];
+    if (!d) return;
+    const lang = currentLang;
+    const numEl = document.getElementById('mOsNum');
+    const dateEl = document.getElementById('mOsDate');
+    const titleEl = document.getElementById('mOsTitle');
+    const descEl = document.getElementById('mOsDesc');
+    const metricsEl = document.getElementById('mOsMetrics');
+    const stackEl = document.getElementById('mOsStack');
+    const repoEl = document.getElementById('mOsRepo');
+
+    if (numEl) numEl.textContent = `${d.num} — ${d.cat[lang].toUpperCase()}`;
+    if (dateEl) dateEl.textContent = d.date[lang];
+    if (titleEl) titleEl.textContent = d.title;
+    if (descEl) descEl.textContent = d.desc[lang];
+    if (metricsEl) {
+      metricsEl.innerHTML = d.metrics.map((m) => (
+        `<div class="m-pill"><span class="m-val">${m.val}</span><span class="m-lbl">${m.lbl[lang]}</span></div>`
+      )).join('');
+    }
+    if (stackEl) {
+      stackEl.innerHTML = d.stack.map((st) => `<span>${st}</span>`).join('');
+    }
+    if (repoEl) repoEl.href = d.repo;
+  }
+
+  function openMobileProject(key) {
+    const modal = document.getElementById('mobileOsModal');
+    if (!modal) return;
+    currentKey = key;
+    mobileModalOpen = true;
+    laptopOpen = true;
+    disposeActiveDemo();
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    if (lenisInstance?.stop) lenisInstance.stop();
+    populateMobileModal(key);
+    requestAnimationFrame(() => {
+      if (mobileModalOpen && currentKey === key) mountLab(key);
+    });
+  }
+
+  function stepMobileProject(delta) {
+    if (!mobileModalOpen) return;
+    const i = PROJECT_KEYS.indexOf(currentKey);
+    const nextKey = PROJECT_KEYS[(i + delta + PROJECT_KEYS.length) % PROJECT_KEYS.length];
+    openMobileProject(nextKey);
+  }
+
   function openProject(key) {
+    if (isMobileViewport()) {
+      openMobileProject(key);
+      return;
+    }
+
     const shelfView = document.getElementById('shelfView');
     const listView = document.getElementById('listView');
     if (shelfView?.classList.contains('hidden')) {
@@ -259,6 +351,15 @@
   }
 
   function closeModal() {
+    if (mobileModalOpen) {
+      mobileModalOpen = false;
+      laptopOpen = false;
+      disposeActiveDemo();
+      document.getElementById('mobileOsModal')?.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+      if (lenisInstance?.start) lenisInstance.start();
+      return;
+    }
     if (!laptopOpen) return;
     laptopOpen = false;
     document.getElementById('deskViewport')?.classList.remove('is-focused');
@@ -266,8 +367,10 @@
   }
 
   function mountLab(key) {
+    disposeActiveDemo();
     const stage = document.getElementById('demoStage');
     const bar = document.getElementById('demoControls');
+    if (!stage || !bar) return;
     stage.innerHTML = ''; bar.innerHTML = '';
 
     if (key === 'anki') {
@@ -415,8 +518,12 @@
       if (dict[k]) el.innerHTML = dict[k];
     });
     document.querySelectorAll('#langToggle [data-set]').forEach((s) => s.classList.toggle('is-active', s.dataset.set === lang));
-    updateManifesto();
+    updateManifesto(true);
     shelfCtrl?.refreshScreen();
+    if (mobileModalOpen && currentKey) {
+      populateMobileModal(currentKey);
+      mountLab(currentKey);
+    }
   }
 
   function showToast(msg) {
@@ -429,11 +536,11 @@
   function initMotion() {
     if (typeof Lenis !== 'undefined' && !prefersReduced) {
       lenisInstance = new Lenis({ duration: 1.12, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
-      lenisInstance.on('scroll', updateManifesto);
+      lenisInstance.on('scroll', () => updateManifesto());
       const raf = (time) => { lenisInstance.raf(time); requestAnimationFrame(raf); };
       requestAnimationFrame(raf);
     }
-    window.addEventListener('resize', updateManifesto, { passive: true });
+    window.addEventListener('resize', () => updateManifesto(true), { passive: true });
 
     if (typeof gsap !== 'undefined' && !prefersReduced) {
       gsap.from('.hero-title .line-in', { yPercent: 108, duration: 1.0, stagger: 0.09, ease: 'power4.out' });
@@ -447,12 +554,24 @@
     }
 
     const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('main section[id]');
+    const sections = Array.from(document.querySelectorAll('main section[id]'));
+    let sectionTops = sections.map((s) => ({ id: s.id, top: s.offsetTop }));
+    const refreshSectionTops = () => {
+      sectionTops = sections.map((s) => ({ id: s.id, top: s.offsetTop }));
+    };
+    window.addEventListener('resize', refreshSectionTops, { passive: true });
+    let lastActiveId = '';
     window.addEventListener('scroll', () => {
+      const sy = window.scrollY;
       let id = '';
-      sections.forEach((s) => { if (window.scrollY >= s.offsetTop - 180) id = s.id; });
-      navLinks.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
-      updateManifesto();
+      for (let i = 0; i < sectionTops.length; i++) {
+        if (sy >= sectionTops[i].top - 180) id = sectionTops[i].id;
+      }
+      if (id !== lastActiveId) {
+        lastActiveId = id;
+        navLinks.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+      }
+      if (!lenisInstance) updateManifesto();
     }, { passive: true });
 
     if (!prefersReduced && !window.matchMedia('(pointer: coarse)').matches) {
@@ -466,15 +585,28 @@
 
       const cur = document.getElementById('studioCursor'), lbl = document.getElementById('cursorLabel');
       if (cur && lbl) {
-        let cx = -100, cy = -100, tx = -100, ty = -100;
-        window.addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; cur.classList.add('active'); }, { passive: true });
+        let cx = -100, cy = -100, tx = -100, ty = -100, moving = false;
+        const tick = () => {
+          const dx = tx - cx, dy = ty - cy;
+          cx += dx * 0.22;
+          cy += dy * 0.22;
+          cur.style.transform = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0) translate(-50%, -50%)`;
+          if (Math.abs(dx) > 0.15 || Math.abs(dy) > 0.15) {
+            requestAnimationFrame(tick);
+          } else {
+            moving = false;
+          }
+        };
+        window.addEventListener('mousemove', (e) => {
+          tx = e.clientX; ty = e.clientY;
+          cur.classList.add('active');
+          if (!moving) { moving = true; requestAnimationFrame(tick); }
+        }, { passive: true });
         document.addEventListener('mouseover', (e) => {
           const t = e.target.closest('[data-cursor]');
           if (t) { lbl.textContent = t.getAttribute('data-cursor'); cur.classList.add('has-label'); }
           else { lbl.textContent = ''; cur.classList.remove('has-label'); }
         });
-        const tick = () => { cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22; cur.style.left = `${cx}px`; cur.style.top = `${cy}px`; requestAnimationFrame(tick); };
-        requestAnimationFrame(tick);
       }
     }
   }
@@ -502,6 +634,10 @@
       document.getElementById('bookshelf-3d'),
       BOOKS_META,
       (key) => {
+        if (isMobileViewport()) {
+          openMobileProject(key);
+          return;
+        }
         currentKey = key;
         laptopOpen = true;
         document.getElementById('deskViewport')?.classList.add('is-focused');
@@ -514,6 +650,7 @@
         projects: PROJECTS,
         projectKeys: PROJECT_KEYS,
         getLang: () => currentLang,
+        isMobile: isMobileViewport,
         onClose: () => {
           laptopOpen = false;
           document.getElementById('deskViewport')?.classList.remove('is-focused');
@@ -521,13 +658,17 @@
       }
     );
 
+    document.getElementById('mOsClose')?.addEventListener('click', closeModal);
+    document.getElementById('mOsPrev')?.addEventListener('click', () => stepMobileProject(-1));
+    document.getElementById('mOsNext')?.addEventListener('click', () => stepMobileProject(1));
+
     items.forEach((p, idx) => {
       p.addEventListener('mouseenter', () => { if (!laptopOpen) { shelfCtrl.highlightBook(idx); onHover(BOOKS_META[idx], idx); } });
       p.addEventListener('click', () => openProject(p.dataset.project));
     });
 
     setTheme(currentTheme);
-    updateManifesto();
+    updateManifesto(true);
     initMotion();
 
     document.getElementById('themeToggle')?.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
@@ -536,7 +677,7 @@
     window.addEventListener('pointermove', (e) => {
       mdMouseX = (e.clientX / window.innerWidth) * 2 - 1;
       mdMouseY = (e.clientY / window.innerHeight) * 2 - 1;
-      updateManifesto();
+      updateManifestoPortrait();
     }, { passive: true });
 
     document.querySelectorAll('#mdFilmTabs .md-ftab').forEach((btn) => {
@@ -544,7 +685,7 @@
         const track = document.getElementById('about');
         if (!track) return;
         const idx = Number(btn.dataset.goto);
-        const topOffset = 58;
+        const topOffset = isMobileViewport() ? 54 : 58;
         const viewH = Math.max(1, window.innerHeight - topOffset);
         const scrollable = Math.max(1, track.offsetHeight - viewH);
         const trackTop = track.getBoundingClientRect().top + window.scrollY;
@@ -560,14 +701,21 @@
       shelfView.classList.toggle('hidden', !isShelf);
       listView.classList.toggle('hidden', isShelf);
       document.querySelectorAll('.seg-btn').forEach((x) => x.classList.toggle('active', x === b));
+      if (isShelf) window.dispatchEvent(new Event('resize'));
     }));
 
     document.querySelectorAll('.work-row[data-project]').forEach((r) => r.addEventListener('click', () => openProject(r.dataset.project)));
     window.addEventListener('keydown', (e) => {
       if (!laptopOpen) return;
       if (e.key === 'Escape') closeModal();
-      if (e.key === 'ArrowRight') shelfCtrl?.stepProject(1);
-      if (e.key === 'ArrowLeft') shelfCtrl?.stepProject(-1);
+      if (e.key === 'ArrowRight') {
+        if (mobileModalOpen) stepMobileProject(1);
+        else shelfCtrl?.stepProject(1);
+      }
+      if (e.key === 'ArrowLeft') {
+        if (mobileModalOpen) stepMobileProject(-1);
+        else shelfCtrl?.stepProject(-1);
+      }
     });
 
     document.getElementById('copyEmailBtn')?.addEventListener('click', async () => {
